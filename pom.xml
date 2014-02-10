@@ -14,9 +14,7 @@
     <packaging>pom</packaging>
 
     <scm>
-        <url>https://github.com/bazaarvoice/jersey-hmac-auth</url>
         <connection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</connection>
-        <developerConnection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</developerConnection>
     </scm>
 
     <properties>
@@ -91,6 +89,7 @@
                 <groupId>com.sun.jersey.jersey-test-framework</groupId>
                 <artifactId>jersey-test-framework-core</artifactId>
                 <version>${jersey.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
