@@ -2,11 +2,9 @@ package com.bazaarvoice.auth.hmac.client;
 
 import com.bazaarvoice.auth.hmac.common.RequestConstants;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
+import com.bazaarvoice.auth.hmac.common.TimeUtils;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.client.ClientRequest;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -27,7 +25,7 @@ public class RequestEncoder {
     }
 
     public void encode(ClientRequest request) {
-        String timestamp = getCurrentTimestamp();
+        String timestamp = TimeUtils.getCurrentTimestamp();
         addApiKey(request);
         addTimestamp(request, timestamp);
         addSignature(request, timestamp);
@@ -77,11 +75,5 @@ public class RequestEncoder {
             content = request.getEntity().toString();
         }
         return content;
-    }
-
-    private String getCurrentTimestamp() {
-        DateTime now = new DateTime();
-        DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
-        return formatter.print(now);
     }
 }

@@ -1,15 +1,14 @@
 package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
+import com.bazaarvoice.auth.hmac.common.TimeUtils;
 import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import org.joda.time.DateTime;
-import org.joda.time.Minutes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO support caching the principal so that getPrincipal does not have to be called on every request
-// TODO support generating Yammer metrics
-// TODO support rate limiting (ideally per API key)
+import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
+import static org.joda.time.Minutes.minutesBetween;
 
 /**
  * An abstract authenticator class that validates user-supplied credentials and returns a
@@ -86,8 +85,8 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator 
      * @return true if the timestamp is valid
      */
     private boolean validateTimestamp(String timestamp) {
-        DateTime requestTime = DateTime.parse(timestamp);
-        int difference = Math.abs(Minutes.minutesBetween(requestTime, DateTime.now()).getMinutes());
+        DateTime requestTime = TimeUtils.parse(timestamp);
+        int difference = Math.abs(minutesBetween(requestTime, nowInUTC()).getMinutes());
         return difference <= acceptableTimestampRange;
     }
 
