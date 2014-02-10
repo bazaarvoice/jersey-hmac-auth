@@ -14,12 +14,6 @@
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <scm>
-        <url>https://github.com/bazaarvoice/jersey-hmac-auth</url>
-        <connection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</connection>
-        <developerConnection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</developerConnection>
-    </scm>
-
     <properties>
         <jersey.version>1.17.1</jersey.version>
     </properties>
