@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.bazaarvoice.auth</groupId>
         <artifactId>jersey-hmac-auth-parent</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.1</version>
         <relativePath>parent/pom.xml</relativePath>
     </parent>
 
@@ -16,7 +16,8 @@
         <url>https://github.com/bazaarvoice/jersey-hmac-auth</url>
         <connection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</connection>
         <developerConnection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</developerConnection>
-    </scm>
+      <tag>jersey-hmac-auth-0.1</tag>
+  </scm>
 
     <modules>
         <module>parent</module>
