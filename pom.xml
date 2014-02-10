@@ -4,8 +4,9 @@
 
     <parent>
         <groupId>com.bazaarvoice.commons</groupId>
-        <artifactId>bv-opensource-super-pom</artifactId>
-        <version>1.0</version>
+        <artifactId>bv-super-pom</artifactId>
+        <version>1.10</version>
+        <relativePath />
     </parent>
 
     <groupId>com.bazaarvoice.auth</groupId>
