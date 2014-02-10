@@ -7,6 +7,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 
+import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.joda.time.Minutes.minutes;
@@ -30,7 +31,7 @@ public class AbstractAuthenticatorTest {
 
     @Test
     public void respondsToExpiredPastTimestampWithNull() throws AuthenticationException {
-        DateTime requestTime = DateTime.now().minusMinutes(ACCEPTABLE_TIMESTAMP_RANGE + 2);
+        DateTime requestTime = nowInUTC().minusMinutes(ACCEPTABLE_TIMESTAMP_RANGE + 2);
         Credentials credentials = createCredentialsWithRequestTime(requestTime);
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
@@ -38,7 +39,7 @@ public class AbstractAuthenticatorTest {
 
     @Test
     public void respondsToExpiredFutureTimestampWithNull() throws AuthenticationException {
-        DateTime requestTime = DateTime.now().plusMinutes(ACCEPTABLE_TIMESTAMP_RANGE + 2);
+        DateTime requestTime = nowInUTC().plusMinutes(ACCEPTABLE_TIMESTAMP_RANGE + 2);
         Credentials credentials = createCredentialsWithRequestTime(requestTime);
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
@@ -52,7 +53,7 @@ public class AbstractAuthenticatorTest {
     }
 
     private Credentials createCredentials() {
-        return createCredentials(DateTime.now(), SECRET_KEY);
+        return createCredentials(nowInUTC(), SECRET_KEY);
     }
 
     private Credentials createCredentialsWithRequestTime(DateTime requestTime) {
@@ -60,7 +61,7 @@ public class AbstractAuthenticatorTest {
     }
 
     private Credentials createCredentialsWithInvalidSecretKey() {
-        return createCredentials(DateTime.now(), SECRET_KEY + "-invalid");
+        return createCredentials(nowInUTC(), SECRET_KEY + "-invalid");
     }
 
     private Credentials createCredentials(DateTime requestTime, String secretKey) {
