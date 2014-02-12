@@ -1,15 +1,13 @@
 package com.bazaarvoice.auth.hmac.server;
 
-import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
-import com.bazaarvoice.auth.hmac.common.Version;
 import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
 import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
+import static com.bazaarvoice.auth.hmac.server.TestCredentials.createCredentials;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
@@ -23,7 +21,7 @@ public class AbstractAuthenticatorTest {
 
     @Test
     public void respondsToValidCredentialsWithPrincipal() throws AuthenticationException {
-        Credentials credentials = createCredentials();
+        Credentials credentials = createCredentials(API_KEY, SECRET_KEY);
         String principal = authenticator.authenticate(credentials);
         assertNotNull(principal);
         assertEquals(PRINCIPAL, principal);
@@ -32,7 +30,7 @@ public class AbstractAuthenticatorTest {
     @Test
     public void respondsToExpiredPastTimestampWithNull() throws AuthenticationException {
         DateTime requestTime = nowInUTC().minusMinutes(1);
-        Credentials credentials = createCredentialsWithRequestTime(requestTime);
+        Credentials credentials = createCredentials(API_KEY, SECRET_KEY, requestTime);
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
     }
@@ -40,46 +38,16 @@ public class AbstractAuthenticatorTest {
     @Test
     public void respondsToExpiredFutureTimestampWithNull() throws AuthenticationException {
         DateTime requestTime = nowInUTC().plusMinutes(1);
-        Credentials credentials = createCredentialsWithRequestTime(requestTime);
+        Credentials credentials = createCredentials(API_KEY, SECRET_KEY, requestTime);
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
     }
 
     @Test
     public void respondsToInvalidSignatureWithNull() throws AuthenticationException {
-        Credentials credentials = createCredentialsWithInvalidSecretKey();
+        Credentials credentials = createCredentials(API_KEY, SECRET_KEY + "-invalid");
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
-    }
-
-    private Credentials createCredentials() {
-        return createCredentials(nowInUTC(), SECRET_KEY);
-    }
-
-    private Credentials createCredentialsWithRequestTime(DateTime requestTime) {
-        return createCredentials(requestTime, SECRET_KEY);
-    }
-
-    private Credentials createCredentialsWithInvalidSecretKey() {
-        return createCredentials(nowInUTC(), SECRET_KEY + "-invalid");
-    }
-
-    private Credentials createCredentials(DateTime requestTime, String secretKey) {
-        String method = "GET";
-        String timestamp = ISODateTimeFormat.dateTime().print(requestTime);
-        String path = "/example?apiKey=foo";
-        String content = "some request content";
-        String signature = new SignatureGenerator().generate(secretKey, method, timestamp, path, content);
-
-        return Credentials.builder()
-                .withVersion(Version.V1)
-                .withApiKey(API_KEY)
-                .withTimestamp(timestamp)
-                .withMethod(method)
-                .withPath(path)
-                .withContent(content)
-                .withSignature(signature)
-                .build();
     }
 
     private AbstractAuthenticator<String> createAuthenticator() {

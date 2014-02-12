@@ -38,12 +38,12 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator 
      * the timestamp on a request can differ from the time on the server when the server receives the
      * request. If the difference exceeds this range, then the request will be denied.
      *
-     * @param duration the length of time for which the timestamp on a request can differ from the server
-     *                 time when the request is received
-     * @param timeUnit the unit {@code duration} is expressed in
+     * @param allowedTimestampSlop the length of time for which the timestamp on a request can differ
+     *                             from the server time when the request is received
+     * @param timeUnit the unit {@code allowedTimestampSlop} is expressed in
      */
-    protected AbstractAuthenticator(long duration, TimeUnit timeUnit) {
-        this.allowedTimestampRange = timeUnit.toMillis(duration);
+    protected AbstractAuthenticator(long allowedTimestampSlop, TimeUnit timeUnit) {
+        this.allowedTimestampRange = timeUnit.toMillis(allowedTimestampSlop);
     }
 
     @Override
