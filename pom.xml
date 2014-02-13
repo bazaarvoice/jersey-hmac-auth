@@ -23,6 +23,7 @@
 
     <properties>
         <jersey.version>1.17.1</jersey.version>
+        <slf4j.version>1.7.5</slf4j.version>
     </properties>
 
     <build>
@@ -72,7 +73,15 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.5</version>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <!-- for unit tests -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
