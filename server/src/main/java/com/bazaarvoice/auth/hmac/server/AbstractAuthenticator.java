@@ -4,33 +4,46 @@ import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.TimeUtils;
 import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
-import static org.joda.time.Minutes.minutesBetween;
 
 /**
- * An abstract authenticator class that validates user-supplied credentials and returns a
- * principal object based on the credentials. This class provides common authentication features
- * such as timestamp validation (to protect against replay attacks) and signature validation.
+ * AbstractAuthenticator is an abstract implementation of {@link Authenticator} that validates a set of
+ * request credentials and returns the principal that the credentials identify. This class provides common
+ * validation features, such as ensuring that the request has a valid timestamp and signature.
  *
  * @param <Principal> the type of principal the authenticator returns
  */
 public abstract class AbstractAuthenticator<Principal> implements Authenticator {
     private static final Logger LOG = LoggerFactory.getLogger(HmacAuthProvider.class);
 
-    private final int acceptableTimestampRange;
+    private final long allowedTimestampRange;           // in milliseconds
 
     /**
-     * Set the acceptable timestamp range in minutes. This is used to validate the timestamp
-     * on the request by making sure that the difference between the request time and the
-     * current server time does not fall outside of the acceptable range.
-     *
-     * @param acceptableTimestampRange the acceptable time range in minutes
+     * Constructs an instance using a default timestamp range of 15 minutes. This is the length of time
+     * for which the timestamp on a request can differ from the time on the server when the server receives
+     * the request. If the difference exceeds this range, then the request will be denied.
      */
-    protected AbstractAuthenticator(int acceptableTimestampRange) {
-        this.acceptableTimestampRange = acceptableTimestampRange;
+    protected AbstractAuthenticator() {
+        this(15, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Constructs an instance using the specified timestamp range. This is the length of time for which
+     * the timestamp on a request can differ from the time on the server when the server receives the
+     * request. If the difference exceeds this range, then the request will be denied.
+     *
+     * @param duration the length of time for which the timestamp on a request can differ from the server
+     *                 time when the request is received
+     * @param timeUnit the unit {@code duration} is expressed in
+     */
+    protected AbstractAuthenticator(long duration, TimeUnit timeUnit) {
+        this.allowedTimestampRange = timeUnit.toMillis(duration);
     }
 
     @Override
@@ -78,16 +91,16 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator 
      * To protect against replay attacks, make sure the timestamp on the request is valid
      * by ensuring that the difference between the request time and the current time on the
      * server does not fall outside the acceptable time range. Note that the request time
-     * may have been generated on a different machine and so it may be slightly ahead or behind
-     * the current server time.
+     * may have been generated on a different machine and so it may be ahead or behind the
+     * current server time.
      *
      * @param timestamp the timestamp specified on the request (in standard ISO8601 format)
      * @return true if the timestamp is valid
      */
     private boolean validateTimestamp(String timestamp) {
         DateTime requestTime = TimeUtils.parse(timestamp);
-        int difference = Math.abs(minutesBetween(requestTime, nowInUTC()).getMinutes());
-        return difference <= acceptableTimestampRange;
+        long difference = Math.abs(new Duration(requestTime, nowInUTC()).getMillis());
+        return difference <= allowedTimestampRange;
     }
 
     /**

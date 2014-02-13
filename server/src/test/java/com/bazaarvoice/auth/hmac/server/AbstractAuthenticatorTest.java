@@ -7,19 +7,19 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
-import static org.joda.time.Minutes.minutes;
 import static org.junit.Assert.assertEquals;
 
 public class AbstractAuthenticatorTest {
     private static final String API_KEY = "api-key";
     private static final String SECRET_KEY = "secret-key";
     private static final String PRINCIPAL = "principal";
-    private static final int ACCEPTABLE_TIMESTAMP_RANGE = minutes(5).getMinutes();
 
-    private final AbstractAuthenticator<String> authenticator = createAuthenticator(ACCEPTABLE_TIMESTAMP_RANGE);
+    private final AbstractAuthenticator<String> authenticator = createAuthenticator();
 
     @Test
     public void respondsToValidCredentialsWithPrincipal() throws AuthenticationException {
@@ -31,7 +31,7 @@ public class AbstractAuthenticatorTest {
 
     @Test
     public void respondsToExpiredPastTimestampWithNull() throws AuthenticationException {
-        DateTime requestTime = nowInUTC().minusMinutes(ACCEPTABLE_TIMESTAMP_RANGE + 2);
+        DateTime requestTime = nowInUTC().minusMinutes(1);
         Credentials credentials = createCredentialsWithRequestTime(requestTime);
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
@@ -39,7 +39,7 @@ public class AbstractAuthenticatorTest {
 
     @Test
     public void respondsToExpiredFutureTimestampWithNull() throws AuthenticationException {
-        DateTime requestTime = nowInUTC().plusMinutes(ACCEPTABLE_TIMESTAMP_RANGE + 2);
+        DateTime requestTime = nowInUTC().plusMinutes(1);
         Credentials credentials = createCredentialsWithRequestTime(requestTime);
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);
@@ -82,8 +82,9 @@ public class AbstractAuthenticatorTest {
                 .build();
     }
 
-    private AbstractAuthenticator<String> createAuthenticator(int acceptableTimestampRange) {
-        return new AbstractAuthenticator<String>(acceptableTimestampRange) {
+    private AbstractAuthenticator<String> createAuthenticator() {
+        // Implement an authenticator that allows a 5 second difference between client and server timestamps
+        return new AbstractAuthenticator<String>(5, TimeUnit.SECONDS) {
             @Override
             protected String getPrincipal(Credentials credentials) {
                 return PRINCIPAL;
