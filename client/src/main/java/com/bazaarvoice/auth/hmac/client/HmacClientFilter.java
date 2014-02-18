@@ -8,6 +8,8 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 
 import java.net.URI;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A Jersey client filter that modifies outbound HTTP requests to encode them for HMAC authentication.
  * This filter takes each request and modifies it to include the appropriate security parameters.
@@ -42,6 +44,9 @@ public class HmacClientFilter extends ClientFilter {
      * @param endpointToSecure the endpoint {@link URI} to secure with this filter
      */
     public HmacClientFilter(String apiKey, String secretKey, URI endpointToSecure) {
+        checkNotNull(apiKey);
+        checkNotNull(secretKey);
+
         this.endpointToSecure = endpointToSecure;
         this.requestEncoder = new RequestEncoder(apiKey, secretKey, new SignatureGenerator());
     }
