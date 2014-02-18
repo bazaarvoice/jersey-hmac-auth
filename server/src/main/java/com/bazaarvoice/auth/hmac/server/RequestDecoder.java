@@ -2,7 +2,15 @@ package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.RequestConstants;
 import com.bazaarvoice.auth.hmac.common.Version;
+import com.sun.jersey.api.container.ContainerException;
 import com.sun.jersey.api.core.HttpRequestContext;
+import com.sun.jersey.core.util.ReaderWriter;
+import com.sun.jersey.spi.container.ContainerRequest;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -41,7 +49,34 @@ public class RequestDecoder {
     }
 
     private String getContent(HttpRequestContext request) {
-        return request.getEntity(String.class);
+        return safelyGetContent(request);
+    }
+
+    /**
+     * Under normal circumstances, the body of the request can only be read once, because it is
+     * backed by an {@code InputStream}, and thus is not easily consumed multiple times. This
+     * method gets the request content and resets it so it can be read again later if necessary.
+     */
+    private String safelyGetContent(HttpRequestContext request) {
+        ContainerRequest containerRequest = (ContainerRequest) request;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        InputStream in = containerRequest.getEntityInputStream();
+
+        try {
+            String content = null;
+            if (in.available() > 0) {
+                ReaderWriter.writeTo(in, out);
+                byte[] requestEntity = out.toByteArray();
+                content = new String(requestEntity);
+
+                // Reset the input stream so that it can be read again by another filter or resource
+                containerRequest.setEntityInputStream(new ByteArrayInputStream(requestEntity));
+            }
+            return content;
+
+        } catch (IOException ex) {
+            throw new ContainerException(ex);
+        }
     }
 
     private String getMethod(HttpRequestContext request) {

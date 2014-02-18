@@ -13,6 +13,7 @@ import com.sun.jersey.test.framework.LowLevelAppDescriptor;
 import org.junit.Test;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -38,6 +39,11 @@ public class HmacAuthProviderTest extends JerseyTest {
         @Path("/optional")
         public String testOptionalAuth(@HmacAuth(required = false) String principal) {
             return principal;
+        }
+
+        @POST
+        public String testWithContent(@HmacAuth String principal, String content) {
+            return content;
         }
     }
 
@@ -134,36 +140,63 @@ public class HmacAuthProviderTest extends JerseyTest {
     }
 
     private String queryWithValidCredentials(boolean authRequired) {
-        return execute(GOOD_API_KEY, authRequired);
+        return get(GOOD_API_KEY, authRequired);
     }
 
     private String queryWithInvalidCredentials(boolean authRequired) {
-        return execute(BAD_API_KEY, authRequired);
+        return get(BAD_API_KEY, authRequired);
     }
 
     private String queryWithoutCredentials(boolean authRequired) {
-        return executeWithoutCredentials(authRequired);
+        return getWithoutCredentials(authRequired);
     }
 
     private String queryAndCauseInternalError(boolean authRequired) {
-        return execute(INTERNAL_ERROR, authRequired);
+        return get(INTERNAL_ERROR, authRequired);
     }
 
-    private String execute(String apiKey, boolean authRequired) {
+    private String get(String apiKey, boolean authRequired) {
         return client().resource(chooseEndpoint(authRequired))
                 .queryParam(RequestConstants.API_KEY_QUERY_PARAM, apiKey)
                 .header(RequestConstants.SIGNATURE_HTTP_HEADER, "signature")
                 .header(RequestConstants.TIMESTAMP_HTTP_HEADER, "timestamp")
                 .header(RequestConstants.VERSION_HTTP_HEADER, Version.V1)
-                .entity("Some content in the request body")
                 .get(String.class);
     }
 
-    private String executeWithoutCredentials(boolean authRequired) {
+    private String getWithoutCredentials(boolean authRequired) {
         return client().resource(chooseEndpoint(authRequired)).get(String.class);
     }
 
     private String chooseEndpoint(boolean authRequired) {
         return authRequired ? "/auth/required" : "/auth/optional";
+    }
+
+    @Test
+    public void preservesRequestContent() {
+        preserves("Some content in the request body");
+    }
+
+    @Test
+    public void preservesRequestContentWhenEmpty() {
+        preserves("");
+    }
+
+    private void preserves(String content) {
+        // If not careful, the auth provider will destroy the request content when it reads it.
+        // Make sure that the request content is preserved so that it successfully reaches the
+        // resource method.
+        String response = post(GOOD_API_KEY, content);
+        assertEquals(content, response);
+    }
+
+    private String post(String apiKey, String content) {
+        return client().resource("/auth")
+                .queryParam(RequestConstants.API_KEY_QUERY_PARAM, apiKey)
+                .header(RequestConstants.SIGNATURE_HTTP_HEADER, "signature")
+                .header(RequestConstants.TIMESTAMP_HTTP_HEADER, "timestamp")
+                .header(RequestConstants.VERSION_HTTP_HEADER, Version.V1)
+                .entity(content)
+                .post(String.class);
     }
 }
