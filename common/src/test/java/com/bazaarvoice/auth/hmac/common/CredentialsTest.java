@@ -1,7 +1,8 @@
-package com.bazaarvoice.auth.hmac.server;
+package com.bazaarvoice.auth.hmac.common;
 
-import com.bazaarvoice.auth.hmac.common.Version;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +33,7 @@ public class CredentialsTest {
 
     @Test
     public void hasContent() {
-        assertEquals("content", credentials.getContent());
+        assertTrue(Arrays.equals("content".getBytes(), credentials.getContent()));
     }
 
     @Test
@@ -67,7 +68,7 @@ public class CredentialsTest {
                 .withSignature("signature")
                 .withPath("/path/to/something?param=pizza")
                 .withTimestamp("timestamp")
-                .withContent("content")
+                .withContent("content".getBytes())
                 .withMethod("GET")
                 .withVersion(Version.V1)
                 .build();

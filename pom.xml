@@ -113,6 +113,13 @@
             </dependency>
 
             <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-json</artifactId>
+                <version>${jersey.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.simpleframework</groupId>
                 <artifactId>simple</artifactId>
                 <version>5.1.6</version>

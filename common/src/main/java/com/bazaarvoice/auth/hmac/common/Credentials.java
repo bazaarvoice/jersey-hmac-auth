@@ -1,9 +1,8 @@
-package com.bazaarvoice.auth.hmac.server;
+package com.bazaarvoice.auth.hmac.common;
 
-import com.bazaarvoice.auth.hmac.common.Version;
+import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.nullToEmpty;
 
 public class Credentials {
     private final Version version;
@@ -12,10 +11,10 @@ public class Credentials {
     private final String path;
     private final String timestamp;
     private final String method;
-    private final String content;
+    private final byte[] content;
 
     public Credentials(Version version, String apiKey, String signature, String path,
-                       String timestamp, String method, String content) {
+                       String timestamp, String method, byte[] content) {
 
         this.version    = checkNotNull(version);
         this.apiKey     = checkNotNull(apiKey);
@@ -23,7 +22,7 @@ public class Credentials {
         this.path       = checkNotNull(path);
         this.timestamp  = checkNotNull(timestamp);
         this.method     = checkNotNull(method);
-        this.content    = nullToEmpty(content);    // optional - not all requests include content in the request body
+        this.content    = content;                  // optional - not all requests have a request body
     }
 
     public static CredentialsBuilder builder() {
@@ -54,7 +53,7 @@ public class Credentials {
         return method;
     }
 
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 
@@ -71,7 +70,7 @@ public class Credentials {
                 && path.equals(that.path)
                 && timestamp.equals(that.timestamp)
                 && method.equals(that.method)
-                && content.equals(that.content);
+                && Arrays.equals(content, that.content);
     }
 
     @Override
@@ -81,8 +80,8 @@ public class Credentials {
         result = 31 * result + (signature != null ? signature.hashCode() : 0);
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
-        result = 31 * result + (content != null ? content.hashCode() : 0);
         result = 31 * result + (method != null ? method.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(content);
         return result;
     }
 
@@ -93,7 +92,7 @@ public class Credentials {
         private String path = "";
         private String timestamp = "";
         private String method = "";
-        private String content = "";
+        private byte[] content = new byte[0];
 
         public Credentials build() {
             return new Credentials(version, apiKey, signature, path, timestamp, method, content);
@@ -129,7 +128,7 @@ public class Credentials {
             return this;
         }
 
-        public CredentialsBuilder withContent(String content) {
+        public CredentialsBuilder withContent(byte[] content) {
             this.content = content;
             return this;
         }

@@ -1,5 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.TimeUtils;
 import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;

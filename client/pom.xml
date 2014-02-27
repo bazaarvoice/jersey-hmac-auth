@@ -58,5 +58,11 @@
             <artifactId>simple</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
