@@ -1,21 +1,19 @@
 package com.bazaarvoice.auth.hmac.client;
 
-import com.bazaarvoice.auth.hmac.common.RequestConstants;
+import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter;
+import com.sun.jersey.api.json.JSONConfiguration;
+import org.junit.Before;
 import org.junit.Test;
-import org.simpleframework.http.Request;
-import org.simpleframework.http.Response;
-import org.simpleframework.http.core.Container;
-import org.simpleframework.http.core.ContainerServer;
-import org.simpleframework.transport.Server;
 import org.simpleframework.transport.connect.Connection;
-import org.simpleframework.transport.connect.SocketConnection;
 
-import java.io.PrintStream;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.Random;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -28,45 +26,61 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * tested. (The ClientFilter class contains <code>final</code> methods that cannot be mocked.)
  */
 public class HmacClientFilterTest {
+    private final static String apiKey = "someApiKey";
+    private final static String secretKey = "someSecretKey";
+    private static int port = 1111;
+
+    @Before
+    public void incrementPort() {
+        // This allows each test method that starts/stops an in-memory HTTP server to use its own port,
+        // which is useful because it takes some time after closing the connection for the port to become
+        // free. An alternative is to sleep for a few seconds between tests, but that would make the
+        // tests take longer to complete.
+        ++port;
+    }
 
     @Test
-    public void addsCredentialsToRequest() throws Exception {
+    public void sendsCredentials() throws Exception {
+        final byte[] content = "something".getBytes();
+
         Connection connection = null;
         try {
-            // Create an in-memory HTTP server that validates that all security credentials are on the request
-            ValidatingHttpServer server = new ValidatingHttpServer() {
+            ValidatingHttpServer server = new ValidatingHttpServer(port) {
                 @Override
-                protected void validate(Request request) throws Exception {
-                    validateApiKey(request);
-                    validateVersion(request);
-                    validateTimestamp(request);
-                    validateSignature(request);
+                protected void validate(Credentials credentials) throws Exception {
+                    validateApiKey(credentials);
+                    validateVersion(credentials);
+                    validateTimestamp(credentials);
+                    validateContent(credentials);
+                    validateSignature(credentials);
                 }
 
-                private void validateApiKey(Request request) throws Exception {
-                    String apiKey = request.getQuery().get(RequestConstants.API_KEY_QUERY_PARAM);
-                    if (!apiKey.equals("myApiKey")) {
-                        throw new Exception("Invalid apiKey: " + apiKey);
+                private void validateApiKey(Credentials credentials) throws Exception {
+                    if (!credentials.getApiKey().equals(apiKey)) {
+                        throw new Exception("Invalid apiKey: " + credentials.getApiKey());
                     }
                 }
 
-                private void validateVersion(Request request) throws Exception {
-                    String version = request.getValue(RequestConstants.VERSION_HTTP_HEADER);
-                    if (Version.fromValue(version) != Version.V1) {
-                        throw new Exception("Invalid version: " + version);
+                private void validateVersion(Credentials credentials) throws Exception {
+                    if (credentials.getVersion() != Version.V1) {
+                        throw new Exception("Invalid version: " + credentials.getVersion());
                     }
                 }
 
-                private void validateTimestamp(Request request) throws Exception {
-                    String timestamp = request.getValue(RequestConstants.TIMESTAMP_HTTP_HEADER);
-                    if (isNullOrEmpty(timestamp)) {
+                private void validateTimestamp(Credentials credentials) throws Exception {
+                    if (isNullOrEmpty(credentials.getTimestamp())) {
                         throw new Exception("Invalid timestamp");
                     }
                 }
 
-                private void validateSignature(Request request) throws Exception {
-                    String signature = request.getValue(RequestConstants.SIGNATURE_HTTP_HEADER);
-                    if (isNullOrEmpty(signature)) {
+                private void validateContent(Credentials credentials) throws Exception {
+                    if (!Arrays.equals(credentials.getContent(), content)) {
+                        throw new Exception("Invalid content");
+                    }
+                }
+
+                private void validateSignature(Credentials credentials) throws Exception {
+                    if (isNullOrEmpty(credentials.getSignature())) {
                         throw new Exception("Invalid signature");
                     }
                 }
@@ -75,11 +89,10 @@ public class HmacClientFilterTest {
             // Launch the server
             connection = server.connect();
 
-            // Send a request to the server. If validation does not succeed, the Jersey client
-            // will throw an exception and the overall test will fail.
-            Client client = new Client();
-            client.addFilter(new HmacClientFilter("myApiKey", "mySecretKey"));
-            client.resource(server.getUrl()).get(String.class);
+            // Send a request to the server. If validation does not succeed, an exception will be thrown.
+            Client client = Client.create();
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+            client.resource(server.getUri()).put(content);
 
         } finally {
             if (connection != null) {
@@ -88,46 +101,96 @@ public class HmacClientFilterTest {
         }
     }
 
-    /**
-     * This abstract class represents an in-memory HTTP server that can receive requests and validate
-     * them in a particular way. Classes that extend this must provide the validation logic.
-     */
-    private static abstract class ValidatingHttpServer implements Container {
-        private static final int PORT = 9999;
+    @Test
+    public void validateSignatureWhenThereIsNoContent() throws Exception {
+        Connection connection = null;
+        try {
+            // Start the server
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            connection = server.connect();
 
-        @Override
-        public void handle(Request request, Response response) {
-            PrintStream body = null;
-            try {
-                body = response.getPrintStream();
+            // Create a client with the filter that is under test
+            Client client = createClient();
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
 
-                validate(request);
-                response.setCode(ClientResponse.Status.OK.getStatusCode());
+            // Send a request with no content in the request body
+            client.resource(server.getUri()).get(String.class);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.setCode(ClientResponse.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-
-            } finally {
-                // The response body has to be explicitly closed in order for this method to return a response
-                if (body != null) {
-                    body.close();
-                }
+        } finally {
+            if (connection != null) {
+                connection.close();
             }
         }
+    }
 
-        protected abstract void validate(Request request) throws Exception;
+    @Test
+    public void validateSignatureWhenContentIsPojo() throws Exception {
+        Connection connection = null;
+        try {
+            // Start the server
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            connection = server.connect();
 
-        public Connection connect() throws Exception {
-            Server server = new ContainerServer(this);
-            Connection connection = new SocketConnection(server);
-            SocketAddress address = new InetSocketAddress(PORT);
-            connection.connect(address);
-            return connection;
+            // Create a client with the filter that is under test
+            Client client = createClient();
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+            client.addFilter(new GZIPContentEncodingFilter(true));
+
+            // Send a pizza in the request body
+            Pizza pizza = new Pizza();
+            pizza.setTopping("olive");
+            client.resource(server.getUri())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .put(pizza);
+
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    @Test
+    public void validateSignatureWhenContentIsBinary() throws Exception {
+        Connection connection = null;
+        try {
+            // Start the server
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            connection = server.connect();
+
+            // Create a client with the filter that is under test
+            Client client = createClient();
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+
+            // Send some random binary data in the request body
+            byte[] binaryData = new byte[2];
+            new Random().nextBytes(binaryData);
+            client.resource(server.getUri())
+                    .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                    .put(binaryData);
+
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    private Client createClient() {
+        ClientConfig config = new DefaultClientConfig();
+        config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+        return Client.create(config);
+    }
+
+    private static class Pizza {
+        private String topping;
+
+        public String getTopping() {
+            return topping;
         }
 
-        public String getUrl() {
-            return String.format("http://localhost:%d", PORT);
+        public void setTopping(String topping) {
+            this.topping = topping;
         }
     }
 }

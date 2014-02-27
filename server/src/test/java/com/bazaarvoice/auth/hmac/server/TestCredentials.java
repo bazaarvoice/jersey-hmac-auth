@@ -1,5 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.Version;
 import org.joda.time.DateTime;
@@ -16,7 +17,7 @@ class TestCredentials {
         String method = "GET";
         String timestamp = ISODateTimeFormat.dateTime().print(requestTime);
         String path = "/example?apiKey=foo";
-        String content = "some request content";
+        byte[] content = "some request content".getBytes();
         String signature = new SignatureGenerator().generate(secretKey, method, timestamp, path, content);
 
         return Credentials.builder()

@@ -1,5 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.RequestConstants;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;

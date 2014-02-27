@@ -29,7 +29,9 @@ timestamp = {the current UTC timestamp in ISO8601 format}
 path = {the request path including all query parameters - e.g. "/pizza?apiKey=myApiKey"}
 content = {the content in the request body, if any is specified on the request}
 
-data = {method + '\n' + timestamp + '\n' + path + '\n' + content}
+data = {method + '\n' + timestamp + '\n' + path}
+if content:
+    data += {'\n' + content}
 digest = hmac(secretKey, data.encode('utf-8'), sha256).digest()
 return base64.urlsafe_b64encode(digest).strip()
 ```

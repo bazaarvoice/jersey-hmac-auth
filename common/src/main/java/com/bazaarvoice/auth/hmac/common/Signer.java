@@ -18,45 +18,18 @@ public class Signer {
         this.secretKey = secretKey;
     }
 
-    public String createSignature(String s1, String ... others) {
-        if (s1 == null) {
-            throw new IllegalArgumentException("s1 must be defined");
-        }
-        String stringToSign = s1;
-
-        if (others != null) {
-            for (String other : others) {
-                if (other != null && other.length() > 0) {
-                    stringToSign = append(stringToSign, other);
-                }
-            }
-        }
-
-        if (stringToSign.length() == 0) {
-            throw new IllegalStateException("Nothing to sign!");
-        }
-
-        return createSignature(stringToSign);
+    public String createSignature(byte[] message) {
+        byte[] digest = calculateDigest(message);
+        return BaseEncoding.base64Url().encode(digest);
     }
 
-    private String createSignature(String stringToSign) {
-        try {
-            byte[] messageBytes = stringToSign.getBytes(UTF_8);
-            byte[] tokenBytes = calculateDigest(messageBytes);
-            return BaseEncoding.base64Url().encode(tokenBytes);
-
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("Need to support UTF_8");
-        }
-    }
-
-    private byte[] calculateDigest(byte[] messageBytes) {
+    private byte[] calculateDigest(byte[] message) {
         try {
             byte[] secretKeyBytes = secretKey.getBytes(UTF_8);
             SecretKeySpec secretKeySpec = new SecretKeySpec(secretKeyBytes, HMAC_SHA256);
             Mac mac = Mac.getInstance(HMAC_SHA256);
             mac.init(secretKeySpec);
-            mac.update(messageBytes);
+            mac.update(message);
             return mac.doFinal();
 
         } catch (UnsupportedEncodingException e) {
@@ -66,9 +39,5 @@ public class Signer {
         } catch (InvalidKeyException e) {
             throw new IllegalStateException("Invalid MAC secret key", e);
         }
-    }
-
-    private String append(String stringToSign, String parameter) {
-        return stringToSign + '\n' + parameter;
     }
 }

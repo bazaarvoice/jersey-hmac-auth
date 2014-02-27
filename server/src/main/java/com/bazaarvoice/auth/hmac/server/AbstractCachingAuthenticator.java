@@ -1,5 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

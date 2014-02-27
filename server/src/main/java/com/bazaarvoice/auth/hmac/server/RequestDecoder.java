@@ -1,5 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.RequestConstants;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.container.ContainerException;
@@ -48,7 +49,7 @@ public class RequestDecoder {
         return getRequiredHeaderField(request, RequestConstants.TIMESTAMP_HTTP_HEADER);
     }
 
-    private String getContent(HttpRequestContext request) {
+    private byte[] getContent(HttpRequestContext request) {
         return safelyGetContent(request);
     }
 
@@ -57,20 +58,19 @@ public class RequestDecoder {
      * backed by an {@code InputStream}, and thus is not easily consumed multiple times. This
      * method gets the request content and resets it so it can be read again later if necessary.
      */
-    private String safelyGetContent(HttpRequestContext request) {
+    private byte[] safelyGetContent(HttpRequestContext request) {
         ContainerRequest containerRequest = (ContainerRequest) request;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         InputStream in = containerRequest.getEntityInputStream();
 
         try {
-            String content = null;
+            byte[] content = null;
             if (in.available() > 0) {
                 ReaderWriter.writeTo(in, out);
-                byte[] requestEntity = out.toByteArray();
-                content = new String(requestEntity);
+                content = out.toByteArray();
 
                 // Reset the input stream so that it can be read again by another filter or resource
-                containerRequest.setEntityInputStream(new ByteArrayInputStream(requestEntity));
+                containerRequest.setEntityInputStream(new ByteArrayInputStream(content));
             }
             return content;
 
