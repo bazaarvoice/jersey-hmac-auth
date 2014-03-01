@@ -56,7 +56,7 @@ public class HmacAuthProvider<T> implements InjectableProvider<HmacAuth, Paramet
                 }
 
             } catch (IllegalArgumentException e) {
-                LOG.debug("Error decoding credentials", e);
+                LOG.info("Error decoding credentials: {}", e.getMessage());
             } catch (AuthenticationException e) {
                 LOG.warn("Error authenticating credentials", e);
                 throw new InternalServerException();

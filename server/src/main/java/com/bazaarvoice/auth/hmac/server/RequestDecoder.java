@@ -31,8 +31,8 @@ public class RequestDecoder {
     }
 
     private String getPath(HttpRequestContext request) {
-        // Get the path and any query parameters included (e.g. //localhost:8080/api/1/clients?apiKey=xxx)
-        return request.getRequestUri().getSchemeSpecificPart();
+        // Get the path and any query parameters (e.g. /api/v1/pizza?sort=toppings&apiKey=someKey)
+        return String.format("%s?%s", request.getRequestUri().getPath(), request.getRequestUri().getQuery());
     }
 
     private String getApiKey(HttpRequestContext request) {
