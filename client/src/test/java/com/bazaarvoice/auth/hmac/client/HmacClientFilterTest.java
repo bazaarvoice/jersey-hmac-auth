@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.simpleframework.transport.connect.Connection;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -168,6 +170,32 @@ public class HmacClientFilterTest {
             client.resource(server.getUri())
                     .type(MediaType.APPLICATION_OCTET_STREAM_TYPE)
                     .put(binaryData);
+
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+
+    @Test
+    public void validateSignatureWhenPathHasQueryParams() throws Exception {
+        Connection connection = null;
+        try {
+            // Start the server
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            connection = server.connect();
+
+            // Create a client with the filter that is under test
+            Client client = createClient();
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+
+            // Send the request to a path other than "/" and that also includes an additional query parameter
+            URI uri = UriBuilder.fromUri(server.getUri())
+                    .segment("api", "v1", "pizza")
+                    .queryParam("sort", "toppings")
+                    .build();
+            client.resource(uri).get(String.class);
 
         } finally {
             if (connection != null) {

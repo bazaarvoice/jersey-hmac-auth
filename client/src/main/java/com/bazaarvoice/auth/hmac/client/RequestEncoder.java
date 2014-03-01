@@ -76,8 +76,8 @@ public class RequestEncoder extends RequestWriter {
     }
 
     private String getPath(ClientRequest request) {
-        // Get the path and any query parameters included (e.g. //localhost:8080/api/1/clients?apiKey=xxx)
-        return request.getURI().getSchemeSpecificPart();
+        // Get the path and any query parameters (e.g. /api/v1/pizza?sort=toppings&apiKey=someKey)
+        return String.format("%s?%s", request.getURI().getPath(), request.getURI().getQuery());
     }
 
     private byte[] getContent(ClientRequest request) {

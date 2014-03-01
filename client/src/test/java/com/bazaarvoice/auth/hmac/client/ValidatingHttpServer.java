@@ -40,7 +40,7 @@ public abstract class ValidatingHttpServer implements Container {
             body = response.getPrintStream();
 
             // Validate the request credentials
-            Credentials credentials = decode(request);
+            Credentials credentials = Decoder.decode(request);
             validate(credentials);
 
             // And we're done
@@ -70,45 +70,47 @@ public abstract class ValidatingHttpServer implements Container {
         return UriBuilder.fromUri("http://localhost").port(port).build();
     }
 
-    private Credentials decode(Request request) {
-        return Credentials.builder()
-                .withApiKey(getApiKey(request))
-                .withSignature(getSignature(request))
-                .withPath(getPath(request))
-                .withTimestamp(getTimestamp(request))
-                .withContent(getContent(request))
-                .withMethod(getMethod(request))
-                .withVersion(Version.V1)
-                .build();
-    }
-
-    private String getApiKey(Request request) {
-        return request.getQuery().get(RequestConstants.API_KEY_QUERY_PARAM);
-    }
-
-    private String getSignature(Request request) {
-        return request.getValue(RequestConstants.SIGNATURE_HTTP_HEADER);
-    }
-
-    private String getPath(Request request) {
-        // Need to return the path in a format like this:  //localhost:9999/api/1/pizza?apiKey=someApiKey
-        return getUri().getSchemeSpecificPart() + request.getTarget();
-    }
-
-    private String getTimestamp(Request request) {
-        return request.getValue(RequestConstants.TIMESTAMP_HTTP_HEADER);
-    }
-
-    private byte[] getContent(Request request) {
-        try {
-            return ByteStreams.toByteArray(request.getInputStream());
-
-        } catch (IOException e) {
-            throw Throwables.propagate(e);
+    private static class Decoder {
+        private static Credentials decode(Request request) {
+            return Credentials.builder()
+                    .withApiKey(getApiKey(request))
+                    .withSignature(getSignature(request))
+                    .withPath(getPath(request))
+                    .withTimestamp(getTimestamp(request))
+                    .withContent(getContent(request))
+                    .withMethod(getMethod(request))
+                    .withVersion(Version.V1)
+                    .build();
         }
-    }
 
-    private String getMethod(Request request) {
-        return request.getMethod();
+        private static String getApiKey(Request request) {
+            return request.getQuery().get(RequestConstants.API_KEY_QUERY_PARAM);
+        }
+
+        private static String getSignature(Request request) {
+            return request.getValue(RequestConstants.SIGNATURE_HTTP_HEADER);
+        }
+
+        private static String getPath(Request request) {
+            // Get the path and any query parameters (e.g. /api/v1/pizza?sort=toppings&apiKey=someKey)
+            return request.getTarget();
+        }
+
+        private static String getTimestamp(Request request) {
+            return request.getValue(RequestConstants.TIMESTAMP_HTTP_HEADER);
+        }
+
+        private static byte[] getContent(Request request) {
+            try {
+                return ByteStreams.toByteArray(request.getInputStream());
+
+            } catch (IOException e) {
+                throw Throwables.propagate(e);
+            }
+        }
+
+        private static String getMethod(Request request) {
+            return request.getMethod();
+        }
     }
 }
