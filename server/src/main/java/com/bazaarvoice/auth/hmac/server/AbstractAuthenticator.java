@@ -20,7 +20,7 @@ import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
  *
  * @param <Principal> the type of principal the authenticator returns
  */
-public abstract class AbstractAuthenticator<Principal> implements Authenticator {
+public abstract class AbstractAuthenticator<Principal> implements Authenticator<Principal> {
     private static final Logger LOG = LoggerFactory.getLogger(HmacAuthProvider.class);
 
     private final long allowedTimestampRange;           // in milliseconds
