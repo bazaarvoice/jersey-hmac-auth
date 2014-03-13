@@ -51,7 +51,7 @@ various request parameters:
 ```
 method = {HTTP request method - e.g. GET, PUT, POST}
 timestamp = {the current UTC timestamp in ISO8601 format}
-path = {the request path including all query parameters - e.g. "/pizza?apiKey=myApiKey"}
+path = {the request path including all query parameters - e.g. "/pizza?apiKey=my-api-key"}
 content = {the content in the request body, if any is specified on the request}
 
 data = {method + '\n' + timestamp + '\n' + path}
