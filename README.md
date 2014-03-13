@@ -176,6 +176,13 @@ client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWo
 ```
 
 
+Sample application
+==================
+
+There is a sample Dropwizard-based service available in the [sample-dropwizard](sample-dropwizard) directory that
+demonstrates how to integrate with this library.
+
+
 Contributing
 ============
 
@@ -185,11 +192,3 @@ To build locally, clone or fork the repository and then run `mvn clean install` 
 
 To submit new requests/issues or to see existing requests/issues, please 
 visit the [Issues](https://github.com/bazaarvoice/jersey-hmac-auth/issues) page.
-
-
-Sample application
-==================
-
-There is a sample Dropwizard-based service available in the [sample-dropwizard](sample-dropwizard) directory that
-demonstrates how to integrate with this library.
-
