@@ -1,7 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
-import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 
 /**
  * An interface for classes which authenticate user-supplied credentials and return principal
@@ -22,7 +21,6 @@ public interface Authenticator<Principal> {
      *
      * @param credentials a set of user-supplied credentials
      * @return either an authenticated principal or null
-     * @throws AuthenticationException if the credentials cannot be authenticated due to an internal error
      */
-    Principal authenticate(Credentials credentials) throws AuthenticationException;
+    Principal authenticate(Credentials credentials);
 }
