@@ -3,7 +3,6 @@ package com.bazaarvoice.auth.hmac.server;
 import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.RequestConstants;
 import com.bazaarvoice.auth.hmac.common.Version;
-import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -38,7 +37,7 @@ public class HmacAuthProviderTest extends JerseyTest {
 
         @GET
         @Path("/optional")
-        public String testOptionalAuth(@HmacAuth(required = false) String principal) {
+        public String testOptionalAuth(@HmacAuth String principal) {
             return principal;
         }
 
@@ -52,19 +51,19 @@ public class HmacAuthProviderTest extends JerseyTest {
     protected AppDescriptor configure() {
         final Authenticator<String> authenticator = new Authenticator<String>() {
             @Override
-            public String authenticate(Credentials credentials) throws AuthenticationException {
+            public String authenticate(Credentials credentials) {
                 if (GOOD_API_KEY.equals(credentials.getApiKey())) {
                     return GOOD_API_KEY;
                 }
                 if (INTERNAL_ERROR.equals(credentials.getApiKey())) {
-                    throw new AuthenticationException("An internal error occurred");
+                    throw new IllegalStateException("An internal error occurred");
                 }
                 return null;
             }
         };
 
         ResourceConfig config = new ScanningResourceConfig();
-        config.getSingletons().add(new HmacAuthProvider<>(authenticator));
+        config.getSingletons().add(new HmacAuthProvider<>(new DefaultRequestHandler<>(authenticator)));
         config.getSingletons().add(new AuthResource());
         return new LowLevelAppDescriptor.Builder(config).build();
     }
@@ -93,19 +92,6 @@ public class HmacAuthProviderTest extends JerseyTest {
     }
 
     @Test
-    public void respondsToInvalidCredentialsWithNullWhenAuthIsOptional() {
-        // This test ensures that the provider injects a null principal object into the resource
-        // method by asserting that the resource method returns a 204 status code
-        try {
-            queryWithInvalidCredentials(false);
-            fail("UniformInterfaceException exception was expected");
-
-        } catch (UniformInterfaceException e) {
-            assertEquals(ClientResponse.Status.NO_CONTENT, e.getResponse().getClientResponseStatus());
-        }
-    }
-
-    @Test
     public void respondsToMissingCredentialsWith401() {
         try {
             queryWithoutCredentials(true);
@@ -113,19 +99,6 @@ public class HmacAuthProviderTest extends JerseyTest {
 
         } catch (UniformInterfaceException e) {
             assertEquals(ClientResponse.Status.UNAUTHORIZED, e.getResponse().getClientResponseStatus());
-        }
-    }
-
-    @Test
-    public void respondsToMissingCredentialsWithNullWhenAuthIsOptional() {
-        // This test ensures that the provider injects a null principal object into the resource
-        // method by asserting that the resource method returns a 204 status code
-        try {
-            queryWithoutCredentials(false);
-            fail("UniformInterfaceException exception was expected");
-
-        } catch (UniformInterfaceException e) {
-            assertEquals(ClientResponse.Status.NO_CONTENT, e.getResponse().getClientResponseStatus());
         }
     }
 

@@ -1,7 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
-import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -21,7 +20,7 @@ public class AbstractAuthenticatorTest {
     private final AbstractAuthenticator<String> authenticator = createAuthenticator();
 
     @Test
-    public void respondsToValidCredentialsWithPrincipal() throws AuthenticationException {
+    public void respondsToValidCredentialsWithPrincipal() {
         Credentials credentials = createCredentials(API_KEY, SECRET_KEY);
         String principal = authenticator.authenticate(credentials);
         assertNotNull(principal);
@@ -29,7 +28,7 @@ public class AbstractAuthenticatorTest {
     }
 
     @Test
-    public void respondsToExpiredPastTimestampWithNull() throws AuthenticationException {
+    public void respondsToExpiredPastTimestampWithNull() {
         DateTime requestTime = nowInUTC().minusMinutes(1);
         Credentials credentials = createCredentials(API_KEY, SECRET_KEY, requestTime);
         String principal = authenticator.authenticate(credentials);
@@ -37,7 +36,7 @@ public class AbstractAuthenticatorTest {
     }
 
     @Test
-    public void respondsToExpiredFutureTimestampWithNull() throws AuthenticationException {
+    public void respondsToExpiredFutureTimestampWithNull() {
         DateTime requestTime = nowInUTC().plusMinutes(1);
         Credentials credentials = createCredentials(API_KEY, SECRET_KEY, requestTime);
         String principal = authenticator.authenticate(credentials);
@@ -45,7 +44,7 @@ public class AbstractAuthenticatorTest {
     }
 
     @Test
-    public void respondsToInvalidSignatureWithNull() throws AuthenticationException {
+    public void respondsToInvalidSignatureWithNull() {
         Credentials credentials = createCredentials(API_KEY, SECRET_KEY + "-invalid");
         String principal = authenticator.authenticate(credentials);
         assertNull(principal);

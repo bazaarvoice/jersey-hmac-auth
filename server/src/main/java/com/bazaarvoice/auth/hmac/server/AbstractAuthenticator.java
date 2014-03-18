@@ -3,7 +3,6 @@ package com.bazaarvoice.auth.hmac.server;
 import com.bazaarvoice.auth.hmac.common.Credentials;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.TimeUtils;
-import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
@@ -48,7 +47,7 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
     }
 
     @Override
-    public Principal authenticate(Credentials credentials) throws AuthenticationException {
+    public Principal authenticate(Credentials credentials) {
         // Make sure the timestamp has not expired - this is to protect against replay attacks
         if (!validateTimestamp(credentials.getTimestamp())) {
             LOG.info("Invalid timestamp");

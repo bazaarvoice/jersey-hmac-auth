@@ -149,11 +149,17 @@ provide all your own authentication logic.
 If using Dropwizard:
 
 ```
-environment.addProvider(new HmacAuthProvider(new MyAuthenticator()));
+environment.addProvider(new HmacAuthProvider(new DefaultRequestHandler(new MyAuthenticator())));
 ```
 
 If using straight Jersey, you basically do the same, but add the `HmacAuthProvider` to your Jersey environment.
 
+Both implementations require specifying (or implementing your own) `RequestHandler`.  There are three `RequestHandler`s
+provided for use:
+
+* [DefaultRequestHandler](server/src/main/java/com/bazaarvoice/auth/hmac/server/PassThroughRequestHandler.java) - for general use, requires all requests to include proper authentication
+* [OptionalRequestHandler](server/src/main/java/com/bazaarvoice/auth/hmac/server/OptionalRequestHandler.java) - relaxed, does not require authentication, but will authenticate if credentials are provided
+* [PassThroughRequestHandler](server/src/main/java/com/bazaarvoice/auth/hmac/server/PassThroughRequestHandler.java) - for testing, simply returns the Principal passed in
 
 Client
 ------

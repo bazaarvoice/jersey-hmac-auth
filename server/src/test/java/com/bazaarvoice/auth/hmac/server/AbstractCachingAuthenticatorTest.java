@@ -1,7 +1,6 @@
 package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
-import com.bazaarvoice.auth.hmac.server.exception.AuthenticationException;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -17,7 +16,7 @@ public class AbstractCachingAuthenticatorTest {
     public static final Credentials cCredentials = createCredentials("c", "c");
 
     @Test
-    public void testCacheWorks() throws AuthenticationException {
+    public void testCacheWorks() {
         // do two requests for 'a', three requests for 'b', one request for 'c'; make sure we get only three calls to load
         Authenticator unit = new Authenticator(5000, 20);
 
@@ -34,7 +33,7 @@ public class AbstractCachingAuthenticatorTest {
     }
 
     @Test
-    public void testClearCache() throws AuthenticationException {
+    public void testClearCache() {
         // do three requests for 'b', followed by a cache clear, then two requests for 'b'; ensure we get only 2 calls to load
         Authenticator unit = new Authenticator(5000, 20);
 
@@ -51,7 +50,7 @@ public class AbstractCachingAuthenticatorTest {
     }
 
     @Test
-    public void testCacheSize() throws AuthenticationException {
+    public void testCacheSize() {
         // do a request for each of 'a', 'b', 'c' in a cache that can't hold that many, and do it several times;
         // ensure that the cache was never used
         Authenticator unit = new Authenticator(5000, 2); // only holds 2 things
@@ -72,7 +71,7 @@ public class AbstractCachingAuthenticatorTest {
     }
 
     @Test
-    public void testCacheExpiration() throws AuthenticationException, InterruptedException {
+    public void testCacheExpiration() throws InterruptedException {
         // do a request for each of 'a', 'b', 'c' a few times, then sleep a bit longer than the cache timeout;
         // ensure that the cache was invalidated appropriately
         Authenticator unit = new Authenticator(300, 20);
@@ -101,7 +100,7 @@ public class AbstractCachingAuthenticatorTest {
     }
 
     @Test
-    public void testApiKeyIsTheKey() throws AuthenticationException, InterruptedException {
+    public void testApiKeyIsTheKey() throws InterruptedException {
         // two requests that are different in time or path alone should still resolve to the same cache
 
         Authenticator unit = new Authenticator(300, 20);
