@@ -132,6 +132,7 @@
         <module>common</module>
         <module>client</module>
         <module>server</module>
+        <module>cli</module>
         <module>sample-dropwizard</module>
     </modules>
 </project>
