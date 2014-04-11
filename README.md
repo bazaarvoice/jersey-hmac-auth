@@ -63,7 +63,8 @@ return base64.urlsafe_b64encode(digest).strip()
   
 (3) The server receives and authenticates the request.
 
-The server uses the API key to identify the caller and retrieve their secret key from where it happens to store it, generates a signature just like the client did when building the request, and compares its signatureto the one passed 
+The server uses the API key to identify the caller and retrieve their secret key from where it happens to store it,
+generates a signature just like the client did when building the request, and compares its signature to the one passed
 by the client. If the signatures match, then the request is valid and the API request can be processed. Otherwise, the
 server returns a "401 (Unauthorized)" HTTP status code.
 
@@ -72,9 +73,8 @@ Getting Started
 ===============
 
 Here's how to implement HMAC authentication for your API. The first section shows how to implement it on the
-server to secure your API, and the subsequent section shows how to implement it in a Java SDK that uses Jersey to 
-build and send API requests. The latter is optional and is only useful if you provide a Java SDK for your API.
-Clients can be implemented in any language just so long as they follow the required protocol when building requests.
+server to secure your API, and the subsequent section shows how to implement it in Java or Python clients. Clients
+can be implemented in any other language just so long as they follow the required protocol when building requests.
 
 
 Server
@@ -161,8 +161,10 @@ provided for use:
 * [OptionalRequestHandler](server/src/main/java/com/bazaarvoice/auth/hmac/server/OptionalRequestHandler.java) - relaxed, does not require authentication, but will authenticate if credentials are provided
 * [PassThroughRequestHandler](server/src/main/java/com/bazaarvoice/auth/hmac/server/PassThroughRequestHandler.java) - for testing, simply returns the Principal passed in
 
-Client
-------
+Java Client
+-----------
+
+To implement a Java client (using Jersey) that constructs requests encoded for HMAC authentication:
 
 (1) Add this maven dependency:
 
@@ -180,6 +182,12 @@ Client
 Client client;              // this is your Jersey client constructed someplace else
 client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
 ```
+
+Python Client
+-------------
+
+To implement a Python client that constructs requests encoded for HMAC authentication, please refer to the
+[python-hmac-auth](https://github.com/bazaarvoice/python-hmac-auth) library.
 
 
 Sample application
