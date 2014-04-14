@@ -24,7 +24,7 @@ is considered authentic and processing continues. Otherwise, the request is reje
 
 Because the secret key is not passed across the "wire", the signatures will only match if the caller has a valid secret
 key. Also, since the signature is generated using various parts of the request itself, the signatures will not match if
-those aspects of the request were tampered with during transimission or if the request is modified and retransmitted for
+those aspects of the request were tampered with during transmission or if the request is modified and retransmitted for
 malicious purposes. If the signatures match, then the client is considered to be a trusted source and the request is
 deemed authentic.
 
