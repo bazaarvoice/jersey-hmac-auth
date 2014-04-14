@@ -8,6 +8,7 @@ import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.MessageDigest;
 import java.util.concurrent.TimeUnit;
 
 import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
@@ -116,7 +117,7 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
     private boolean validateSignature(Credentials credentials, String secretKey) {
         String clientSignature = credentials.getSignature();
         String serverSignature = createSignature(credentials, secretKey);
-        return clientSignature.equals(serverSignature);
+        return MessageDigest.isEqual(clientSignature.getBytes(), serverSignature.getBytes());
     }
 
     /**

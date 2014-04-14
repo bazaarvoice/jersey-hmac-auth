@@ -51,8 +51,8 @@ public class AbstractAuthenticatorTest {
     }
 
     private AbstractAuthenticator<String> createAuthenticator() {
-        // Implement an authenticator that allows a 5 second difference between client and server timestamps
-        return new AbstractAuthenticator<String>(5, TimeUnit.SECONDS) {
+        // Implement an authenticator that allows a 30 second difference between client and server timestamps
+        return new AbstractAuthenticator<String>(30, TimeUnit.SECONDS) {
             @Override
             protected String getPrincipal(Credentials credentials) {
                 return PRINCIPAL;
