@@ -48,7 +48,7 @@ X-Auth-Signature: yrVWPUAPAlV0sgAh22MYU-zR5unaoTrNTaTl11XjoMs=
 The signature specified by the `X-Auth-Signature` header is created as follows. It is constructed using the secret key and
 various request parameters:
   
-```
+```python
 method = {HTTP request method - e.g. GET, PUT, POST}
 timestamp = {the current UTC timestamp in ISO8601 format}
 path = {the request path including all query parameters - e.g. "/pizza?apiKey=my-api-key"}
@@ -82,7 +82,7 @@ Server
 
 (1) Add this maven dependency:
 
-```
+```xml
 <dependency>
     <groupId>com.bazaarvoice.auth</groupId>
     <artifactId>jersey-hmac-auth-server</artifactId>
@@ -94,7 +94,7 @@ Server
 
 For example:
 
-```
+```java
 @Path("/pizza")
 @Produces(MediaType.TEXT_PLAIN)
 public class PizzaResource {
@@ -121,17 +121,17 @@ the request has not been tampered with after being sent.
 
 Here's an example implementation:
 
-```
-public class MyAuthenticator extends AbstractAuthenticator<String> {
+```java
+public class MyAuthenticator extends AbstractAuthenticator<Principal> {
     // some code is intentially missing 
     
     @Override
-    protected String getPrincipal(Credentials credentials) {
+    protected Principal getPrincipal(Credentials credentials) {
         // Return the principal identified by the credentials from the API request
     } 
 
     @Override
-    protected String getSecretKeyFromPrincipal(String principal) {
+    protected String getSecretKeyFromPrincipal(Principal principal) {
         // Return the secret key for the given principal
     }
 }
@@ -148,8 +148,8 @@ provide all your own authentication logic.
 
 If using Dropwizard:
 
-```
-environment.addProvider(new HmacAuthProvider(new DefaultRequestHandler(new MyAuthenticator())));
+```java
+environment.addProvider(new HmacAuthProvider<HmacAuth, Principal>(new DefaultRequestHandler(new MyAuthenticator())));
 ```
 
 If using straight Jersey, you basically do the same, but add the `HmacAuthProvider` to your Jersey environment.
@@ -168,7 +168,7 @@ To implement a Java client (using Jersey) that constructs requests encoded for H
 
 (1) Add this maven dependency:
 
-```
+```xml
 <dependency>
     <groupId>com.bazaarvoice.auth</groupId>
     <artifactId>jersey-hmac-auth-client</artifactId>
@@ -178,7 +178,7 @@ To implement a Java client (using Jersey) that constructs requests encoded for H
 
 (2) Add the `HmacClientFilter` to your Jersey client:
 
-```
+```java
 Client client;              // this is your Jersey client constructed someplace else
 client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
 ```
