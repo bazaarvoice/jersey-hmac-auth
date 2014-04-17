@@ -8,10 +8,18 @@ import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
 
-public class HmacAuthProvider<T> implements InjectableProvider<HmacAuth, Parameter> {
-    private final RequestHandler<T> requestHandler;
+import java.lang.annotation.Annotation;
 
-    public HmacAuthProvider(RequestHandler<T> requestHandler) {
+/**
+ * An implementation of Jersey's InjectableProvider to perform the actual integration with Jersey.
+ *
+ * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <PrincipalType> the type of principal the {@link RequestHandler} returns
+ */
+public abstract class HmacAuthProvider<AnnotationType extends Annotation, PrincipalType> implements InjectableProvider<AnnotationType, Parameter> {
+    private final RequestHandler<AnnotationType, PrincipalType> requestHandler;
+
+    public HmacAuthProvider(RequestHandler<AnnotationType, PrincipalType> requestHandler) {
         this.requestHandler = requestHandler;
     }
 
@@ -21,20 +29,22 @@ public class HmacAuthProvider<T> implements InjectableProvider<HmacAuth, Paramet
     }
 
     @Override
-    public Injectable getInjectable(ComponentContext componentContext, HmacAuth hmacAuth, Parameter parameter) {
-        return new HmacAuthInjectable<>(requestHandler);
+    public Injectable getInjectable(ComponentContext componentContext, AnnotationType annotation, Parameter parameter) {
+        return new HmacAuthInjectable<>(annotation, requestHandler);
     }
 
-    private static class HmacAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
-        private final RequestHandler<T> requestHandler;
+    private static class HmacAuthInjectable<AnnotationType extends Annotation, PrincipalType> extends AbstractHttpContextInjectable<PrincipalType> {
+        private final AnnotationType annotation;
+        private final RequestHandler<AnnotationType, PrincipalType> requestHandler;
 
-        private HmacAuthInjectable( RequestHandler<T> requestHandler) {
+        private HmacAuthInjectable(AnnotationType annotation, RequestHandler<AnnotationType, PrincipalType> requestHandler) {
+            this.annotation = annotation;
             this.requestHandler = requestHandler;
         }
 
         @Override
-        public T getValue(HttpContext httpContext) {
-            return requestHandler.handle(httpContext.getRequest());
+        public PrincipalType getValue(HttpContext httpContext) {
+            return requestHandler.handle(annotation, httpContext.getRequest());
         }
     }
 }

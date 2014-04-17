@@ -8,37 +8,46 @@ import com.sun.jersey.api.core.HttpRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
+
 /**
- * A strict implementation of a <code>RequestHandler</code>, which requires all requests to an annotated
+ * AnnotationType strict implementation of a <code>RequestHandler</code>, which requires all requests to an annotated
  * endpoint to contain valid authentication credentials.
  *
- * @param <Principal> the type of principal the handler returns
+ * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <PrincipalType> the type of principal the handler returns
  */
-public class DefaultRequestHandler<Principal> implements RequestHandler<Principal> {
+public class DefaultRequestHandler<AnnotationType extends Annotation, PrincipalType> implements RequestHandler<AnnotationType, PrincipalType> {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultRequestHandler.class);
 
     private final RequestDecoder requestDecoder;
-    private final Authenticator<Principal> authenticator;
+    private final Authenticator<PrincipalType> authenticator;
+    private final Authorizer<AnnotationType, PrincipalType> authorizer;
 
-    public DefaultRequestHandler(Authenticator<Principal> authenticator) {
-        this(new RequestDecoder(), authenticator);
+    public DefaultRequestHandler(Authenticator<PrincipalType> authenticator) {
+        this(authenticator, null);
+    }
+
+    public DefaultRequestHandler(Authenticator<PrincipalType> authenticator, Authorizer<AnnotationType, PrincipalType> authorizer) {
+        this(new RequestDecoder(), authenticator, authorizer);
     }
 
     @VisibleForTesting
-    DefaultRequestHandler(RequestDecoder requestDecoder, Authenticator<Principal> authenticator) {
+    DefaultRequestHandler(RequestDecoder requestDecoder, Authenticator<PrincipalType> authenticator, Authorizer<AnnotationType, PrincipalType> authorizer) {
         this.requestDecoder = requestDecoder;
         this.authenticator = authenticator;
+        this.authorizer = authorizer;
     }
 
     @Override
-    public Principal handle(HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
+    public PrincipalType handle(AnnotationType annotation, HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
         try {
             Credentials credentials = requestDecoder.decode(request);
-            Principal result = authenticator.authenticate(credentials);
-            if (result != null) {
-                return result;
-            }
+            PrincipalType principal = authenticator.authenticate(credentials);
 
+            if (principal != null && (authorizer == null || authorizer.authorize(annotation, principal))) {
+                return principal;
+            }
         } catch (IllegalArgumentException e) {
             LOG.info("Error decoding credentials: {}", e.getMessage());
             throw new NotAuthorizedException();

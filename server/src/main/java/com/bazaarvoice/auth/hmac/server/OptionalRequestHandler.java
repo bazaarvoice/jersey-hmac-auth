@@ -8,33 +8,36 @@ import com.sun.jersey.api.core.HttpRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
+
 /**
- * A relaxed implementation of a <code>RequestHandler</code>, which does not require a request
+ * AnnotationType relaxed implementation of a <code>RequestHandler</code>, which does not require a request
  * to contain authentication credentials, but still validates credentials if provided.
  *
- * @param <Principal> the type of principal the handler returns
+ * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <PrincipalType> the type of principal the handler returns
  */
-public class OptionalRequestHandler<Principal> implements RequestHandler<Principal> {
+public class OptionalRequestHandler<AnnotationType extends Annotation, PrincipalType> implements RequestHandler<AnnotationType, PrincipalType> {
     private static final Logger LOG = LoggerFactory.getLogger(OptionalRequestHandler.class);
 
     private final RequestDecoder requestDecoder;
-    private final Authenticator<Principal> authenticator;
+    private final Authenticator<PrincipalType> authenticator;
 
-    public OptionalRequestHandler(Authenticator<Principal> authenticator) {
+    public OptionalRequestHandler(Authenticator<PrincipalType> authenticator) {
         this(new RequestDecoder(), authenticator);
     }
 
     @VisibleForTesting
-    OptionalRequestHandler(RequestDecoder requestDecoder, Authenticator<Principal> authenticator) {
+    OptionalRequestHandler(RequestDecoder requestDecoder, Authenticator<PrincipalType> authenticator) {
         this.requestDecoder = requestDecoder;
         this.authenticator = authenticator;
     }
 
     @Override
-    public Principal handle(HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
+    public PrincipalType handle(AnnotationType annotation, HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
         try {
             Credentials credentials = requestDecoder.decode(request);
-            Principal result = authenticator.authenticate(credentials);
+            PrincipalType result = authenticator.authenticate(credentials);
             if (result != null) {
                 return result;
             }
