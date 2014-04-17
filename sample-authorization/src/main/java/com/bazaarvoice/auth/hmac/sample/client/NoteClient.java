@@ -30,9 +30,11 @@ public class NoteClient {
                     .segment("notes",  id)
                     .build();
 
-            Note n = jerseyClient.resource(uri)
+            Collection<Note> cn = jerseyClient.resource(uri)
                     .type(MediaType.APPLICATION_JSON)
-                    .put(Note.class, note);
+                    .put(new GenericType<Collection<Note>>() {}, note);
+
+            Note n = cn.size() > 0 ? cn.iterator().next() : null;
 
             if (n != null) {
                 System.out.println("Overwrote note: " + n.getContent() + " with: " + note.getContent());
@@ -54,12 +56,16 @@ public class NoteClient {
                     .segment("notes", id)
                     .build();
 
-            Note n = jerseyClient.resource(uri)
+            Collection<Note> cn = jerseyClient.resource(uri)
                     .type(MediaType.APPLICATION_JSON)
-                    .delete(Note.class);
+                    .delete(new GenericType<Collection<Note>>() {});
+
+            Note n = cn.size() > 0 ? cn.iterator().next() : null;
 
             if (n != null) {
                 System.out.println("Deleted note: " + n.getContent());
+            } else {
+                System.out.println("No note to delete with id: " + id);
             }
 
             return n;
