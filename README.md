@@ -149,7 +149,7 @@ provide all your own authentication logic.
 If using Dropwizard:
 
 ```java
-environment.addProvider(new HmacAuthProvider<HmacAuth, Principal>(new DefaultRequestHandler(new MyAuthenticator())));
+environment.addProvider(new HmacAuthProvider<HmacAuth, Principal>(new DefaultRequestHandler(new MyAuthenticator())) {});
 ```
 
 If using straight Jersey, you basically do the same, but add the `HmacAuthProvider` to your Jersey environment.

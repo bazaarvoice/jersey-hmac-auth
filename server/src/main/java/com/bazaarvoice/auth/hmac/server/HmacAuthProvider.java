@@ -16,7 +16,7 @@ import java.lang.annotation.Annotation;
  * @param <A> the type of annotation to look for (consider using {@link HmacAuth})
  * @param <P> the type of principal the handler returns
  */
-public class HmacAuthProvider<A extends Annotation, P> implements InjectableProvider<A, Parameter> {
+public abstract class HmacAuthProvider<A extends Annotation, P> implements InjectableProvider<A, Parameter> {
     private final RequestHandler<P> requestHandler;
 
     public HmacAuthProvider(RequestHandler<P> requestHandler) {
