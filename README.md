@@ -196,6 +196,55 @@ Sample application
 There is a sample Dropwizard-based service available in the [sample-dropwizard](sample-dropwizard) directory that
 demonstrates how to integrate with this library.
 
+Authorization
+=============
+
+Extend your use of this library to prevent some users from accessing higher privileged segments of your API. Checkout
+the [sample-authorization](sample-authorization) directory for a completely working template. Instead of using `@HmacAuth`
+you can use any annotation of your choosing and then implement `Authorizer` and pass that into the `DefaultRequestHandler`
+to automatically authorize every request.
+
+(1) Create an Annotation that exposes the required authorization right.
+
+```java
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface SecureRPC {
+    public UserRight[] requiredRights();
+}
+```
+
+Where UserRight, for the sample app, is an enum. Although, you could communicate this information any way you please. The enum is defined as:
+```java
+public enum UserRight {
+    CREATE_NOTE,
+    DELETE_NOTE,
+    VIEW_NOTES
+}
+```
+
+(2) Annotate your resource(s).
+
+```java
+public Collection<Note> createNote(@SecureRPC(requiredRights = UserRight.CREATE_NOTE) User user, ...
+```
+
+(3) Implement the `Authorizer` interface.
+
+```java
+public class SecureRPCAuthorizer implements Authorizer<SecureRPC, User> {
+    @Override
+    public boolean authorize(final SecureRPC annotation, final User principal) {
+        return principal.hasRights(annotation.requiredRights());
+    }
+}
+```
+
+(4) Register the injectable provider with jersey.
+
+```java
+environment.addProvider(new HmacAuthProvider<SecureRPC, User>(new DefaultRequestHandler<>(new SimpleAuthenticator(), new SecureRPCAuthorizer())) {});
+```
 
 Contributing
 ============

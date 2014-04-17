@@ -29,7 +29,7 @@ public class User {
         return secretKey;
     }
 
-    public boolean hasRight(UserRight ... rights) {
-        return role.hasRight(rights);
+    public boolean hasRights(UserRight... rights) {
+        return role.hasRights(rights);
     }
 }
