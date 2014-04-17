@@ -35,11 +35,14 @@ public class NoteClient {
                     .put(Note.class, note);
 
             if (n != null) {
-                System.out.println("Overwrote note: " + n.getContent());
+                System.out.println("Overwrote note: " + n.getContent() + " with: " + note.getContent());
+            } else {
+                System.out.println("Wrote note: " + note.getContent());
             }
 
             return n;
         } catch (Exception ignored) {
+            System.out.println("Unauthorized to write note: " + id);
             return null;
         }
     }
@@ -61,6 +64,7 @@ public class NoteClient {
 
             return n;
         } catch (Exception ignored) {
+            System.out.println("Unauthorized to delete note: " + id);
             return null;
         }
     }

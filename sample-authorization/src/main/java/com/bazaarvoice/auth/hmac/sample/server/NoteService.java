@@ -1,6 +1,7 @@
 package com.bazaarvoice.auth.hmac.sample.server;
 
 import com.bazaarvoice.auth.hmac.sample.server.auth.SecureRPC;
+import com.bazaarvoice.auth.hmac.sample.server.auth.SecureRPCAuthorizer;
 import com.bazaarvoice.auth.hmac.sample.server.auth.SimpleAuthenticator;
 import com.bazaarvoice.auth.hmac.sample.server.auth.User;
 import com.bazaarvoice.auth.hmac.server.DefaultRequestHandler;
@@ -25,6 +26,6 @@ public class NoteService extends Service<Configuration> {
     public void run(Configuration configuration, Environment environment) throws Exception {
         environment.addResource(new NoteResource());
         environment.addHealthCheck(new NoteHealthCheck());
-        environment.addProvider(new HmacAuthProvider<SecureRPC, User>(new DefaultRequestHandler<>(new SimpleAuthenticator())) {});
+        environment.addProvider(new HmacAuthProvider<SecureRPC, User>(new DefaultRequestHandler<>(new SimpleAuthenticator(), new SecureRPCAuthorizer())) {});
     }
 }

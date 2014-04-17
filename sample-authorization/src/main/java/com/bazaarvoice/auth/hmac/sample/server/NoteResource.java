@@ -32,7 +32,7 @@ public class NoteResource {
     public Note createNote(@PathParam("id") String id,
                            @SecureRPC(requiredRights = UserRight.CREATE_NOTE) User user,
                            Note note) {
-//        log.info("Note {} created by: {}", id, user.getName());
+        log.info("Note {} created by: {}", id, user.getName());
         return noteMap.put(id, note);
     }
 
