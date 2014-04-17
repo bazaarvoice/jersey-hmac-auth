@@ -11,8 +11,8 @@ import java.net.URI;
 import java.util.Collection;
 
 /**
- * This is a Java SDK for the Pizza API. It uses jersey-hmac-auth to build requests such that they can be
- * authenticated by the API.
+ * This is a Java SDK for the Note API. It uses jersey-hmac-auth to build requests such that they can be
+ * authenticated and authorized by the API.
  */
 public class NoteClient {
     private final UriBuilder uriBuilder;

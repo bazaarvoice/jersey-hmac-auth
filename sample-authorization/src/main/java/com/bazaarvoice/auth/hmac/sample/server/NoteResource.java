@@ -29,26 +29,26 @@ public class NoteResource {
     private Map<String, Note> noteMap = Maps.newConcurrentMap();
 
     @PUT
-    @Path("/{id}")
-    public Collection<Note> createNote(@PathParam("id") String id,
-                           @SecureRPC(requiredRights = UserRight.CREATE_NOTE) User user,
-                           Note note) {
+    @Path ("/{id}")
+    public Collection<Note> createNote(@PathParam ("id") String id,
+                                       @SecureRPC (requiredRights = UserRight.CREATE_NOTE) User user,
+                                       Note note) {
         log.info("Note {} created by: {}", id, user.getName());
         Note n = noteMap.put(id, note);
         return n != null ? Collections.singleton(n) : Collections.<Note>emptyList();
     }
 
     @DELETE
-    @Path("/{id}")
-    public Collection<Note> deleteNote(@PathParam("id") String id,
-                           @SecureRPC(requiredRights = UserRight.DELETE_NOTE) User user) {
+    @Path ("/{id}")
+    public Collection<Note> deleteNote(@PathParam ("id") String id,
+                                       @SecureRPC (requiredRights = UserRight.DELETE_NOTE) User user) {
         log.info("Note {} deleted by: {}", id, user.getName());
         Note n = noteMap.remove(id);
         return n != null ? Collections.singleton(n) : Collections.<Note>emptyList();
     }
 
     @GET
-    public Collection<Note> viewNotes(@SecureRPC(requiredRights = UserRight.VIEW_NOTES) User user) {
+    public Collection<Note> viewNotes(@SecureRPC (requiredRights = UserRight.VIEW_NOTES) User user) {
         log.info("{} Notes viewed by: {}", noteMap.size(), user.getName());
         return noteMap.values();
     }

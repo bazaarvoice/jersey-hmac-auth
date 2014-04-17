@@ -19,7 +19,7 @@ public class NoteService extends Service<Configuration> {
 
     @Override
     public void initialize(Bootstrap<Configuration> bootstrap) {
-        bootstrap.setName("pizza-application");
+        bootstrap.setName("note-application");
     }
 
     @Override
