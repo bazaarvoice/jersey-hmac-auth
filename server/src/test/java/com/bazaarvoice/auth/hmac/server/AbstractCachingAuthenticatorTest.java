@@ -112,6 +112,21 @@ public class AbstractCachingAuthenticatorTest {
         assertEquals(1, unit.getNumLoads());
     }
 
+    @Test
+    public void testPrecache() {
+        Authenticator unit = new Authenticator(300, 20);
+
+        unit.cachePrincipal(aCredentials.getApiKey(),
+            new SimplePrincipal("a"));
+
+        unit.cachePrincipal(bCredentials.getApiKey(),
+            new SimplePrincipal("b"));
+
+        unit.authenticate(aCredentials);
+        unit.authenticate(bCredentials);
+        assertEquals(0, unit.getNumLoads());
+    }
+
     private static class Authenticator extends AbstractCachingAuthenticator<SimplePrincipal> {
         private final AtomicInteger numLoads = new AtomicInteger(0);
 

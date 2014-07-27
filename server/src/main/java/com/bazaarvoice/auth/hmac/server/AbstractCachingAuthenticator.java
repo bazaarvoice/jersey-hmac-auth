@@ -56,4 +56,12 @@ public abstract class AbstractCachingAuthenticator<Principal> extends AbstractAu
             return null;
         }
     }
+
+    /**
+     * Put this principal directly into cache.  This can avoid lookup on
+     * user request and "prepay" the lookup cost.
+     */
+    protected void cachePrincipal(String apiKey, Principal principal) {
+        cache.put(apiKey, Optional.fromNullable(principal));
+    }
 }
