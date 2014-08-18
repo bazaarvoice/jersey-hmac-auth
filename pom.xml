@@ -18,8 +18,8 @@
         <url>https://github.com/bazaarvoice/jersey-hmac-auth</url>
         <connection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</connection>
         <developerConnection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</developerConnection>
-      <tag>jersey-hmac-auth-0.10</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <java.minimum.version>1.7</java.minimum.version>
