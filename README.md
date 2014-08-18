@@ -2,13 +2,13 @@
 
 Jersey-based HMAC authentication for the client and server.
 
-This library makes it easy to implement HMAC authentication for REST API's implemented using the 
-[Jersey](https://jersey.java.net) library. (Note that this works for any Jersey-based application or framework,
-including the [Dropwizard](http://dropwizard.io/) framework.) 
+This library makes it easy to add HMAC authentication to REST API's that are implemented using the 
+[Jersey](https://jersey.java.net) library. Note that this also works for Jersey-based frameworks, like
+[Dropwizard](http://dropwizard.io/). 
 
-You can use jersey-hmac-auth to ensure that only authorized callers are permitted to access your API. You do this by 
-granting each API caller an API key and secret key, and they use these to construct API requests that can be authenticated 
-by the server.
+HMAC authentication provides a way for you to ensure the integrity and authenticity of API requests. You grant 
+API access to permitted callers by given each one an API key and a secret key that they use when generating requests.
+You can use this library to add support for HMAC authentication on the client and server.
 
 
 ## Getting Started

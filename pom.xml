@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.bazaarvoice.commons</groupId>
         <artifactId>bv-opensource-super-pom</artifactId>
-        <version>1.1</version>
+        <version>1.2</version>
         <relativePath />
     </parent>
 
@@ -22,23 +22,29 @@
   </scm>
 
     <properties>
+        <java.minimum.version>1.7</java.minimum.version>
         <jersey.version>1.17.1</jersey.version>
         <slf4j.version>1.7.5</slf4j.version>
     </properties>
 
     <build>
         <plugins>
+            <!-- Make sure we always turn all warnings on during compilation. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <!-- Use java 1.7 for all compilation -->
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <!-- Make sure we always turn all warnings on during compilation. -->
                     <compilerArgument>-Xlint:all</compilerArgument>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
+                </configuration>
+            </plugin>
+            <!-- Release and deploy artifacts, bypassing the staging environment in the OSS Sonatype repository. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <goals>deploy nexus-staging:release</goals>
                 </configuration>
             </plugin>
         </plugins>
