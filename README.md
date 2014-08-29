@@ -7,7 +7,7 @@ This library makes it easy to add HMAC authentication to REST API's that are imp
 [Dropwizard](http://dropwizard.io/). 
 
 HMAC authentication provides a way for you to ensure the integrity and authenticity of API requests. You grant 
-API access to permitted callers by given each one an API key and a secret key that they use when generating requests.
+API access to permitted callers by giving each one an API key and a secret key that they use when generating requests.
 You can use this library to add support for HMAC authentication on the client and server.
 
 
