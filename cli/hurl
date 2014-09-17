@@ -1,3 +1,14 @@
 #!/bin/bash
 
-java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar "$@"
+HURL_PROFILE="default"
+
+if [ "$1" == "--configure" ]; then
+    echo -n "Enter Hurl ApiKey [**** ${HURL_APIJEY:(-2)}]: " && read HURL_APIKEY
+    echo -n "Enter Hurl Secret [**** ${HURL_SECRET:(-2)}]: " && read HURL_SECRET
+    exit 0
+fi
+
+[[ -z "$HURL_APIKEY" ]] && export HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+[[ -z "$HURL_SECRET" ]] && export HURL_SECRET="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+
+java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" "$@"

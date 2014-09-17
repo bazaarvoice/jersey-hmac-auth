@@ -20,10 +20,20 @@ usage: hurl [-h] [-X {GET,POST}] --apiKey APIKEY --secretKey SECRETKEY [-v] [--d
 
 Like curl, for hmac-protected resources
 
+configuration:
+
+  hurl can be configured to use the auth parms in multiple ways:	
+    * environment variables HURL_APIKEY & HURL_SECRET 
+    * file ~/.hurl/default.conf containing these two params
+        apiKey <api key>
+  	secret <secret key>
+    * runtime arguments (see optional arguments below)
+
 positional arguments:
   url
 
 optional arguments:
+  --configure		 configure api key & secret key for current session
   -h, --help             show this help message and exit
   -X {GET,POST}, --request {GET,POST}
                          GET (default) or POST (default: GET)
