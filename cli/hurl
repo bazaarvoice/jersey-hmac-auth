@@ -1,3 +1,88 @@
 #!/bin/bash
 
-java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar "$@"
+usage()
+{
+cat << EOF
+
+usage: $0 options
+
+hurl is synonymous for curl with hmac auth
+
+OPTIONS:
+   -h      this help message
+   -p      auth profile to use (default points to ~/.hurl/default.conf)
+   -a      api key 
+   -s      secret key
+   -c      configure a current session to use a temp apikey/secret
+   -v      verbose mode
+
+------------------------------------------
+
+EOF
+}
+
+HURL_PROFILE="default"
+ARGS=""
+VERBOSE=""
+
+while [[ $# > 0 ]]; do
+    key="$1"
+    shift
+    case $key in
+        -p|--profile)
+        HURL_PROFILE="$1"
+        shift
+        ;;
+        -h|--help)
+        usage
+        java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar -h
+        exit 0
+        ;;
+        -a|--api-key)
+        HURL_APIKEY="$1"
+        shift
+        ;;
+        -s|--secret-key)
+        HURL_SECRET="$1"
+        shift
+        ;;
+        -c|--configure)
+        CONFIGURE="true"
+        ;;
+        -v|--verbose)
+        VERBOSE="true"
+        ARGS="$ARGS $key"
+        ;;
+        *)
+        ARGS="$ARGS $key"
+        ;;
+    esac
+done
+
+if [ ! -f ~/.hurl/$HURL_PROFILE.conf ]; then
+    [[ ! -z "$VERBOSE" ]] && echo "~/.hurl/$HURL_PROFILE.conf not found, using env variables"
+else
+    [[ -z "$HURL_APIKEY" ]] && HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+    [[ -z "$HURL_SECRET" ]] && HURL_SECRET="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+fi
+
+if [[ -z "$HURL_APIKEY" || -z "$HURL_SECRET" || ! -z $CONFIGURE ]]; then
+    echo -n "Enter Hurl ApiKey [****${HURL_APIKEY:(-4)}]: " && read HURL_APIKEY
+    echo -n "Enter Hurl Secret [****${HURL_SECRET:(-4)}]: " && read HURL_SECRET
+fi
+
+ARGS=$(echo ${ARGS} | sed -e 's/^ *//g;s/ *$//g')
+
+if [ -z "$ARGS" ]; then
+    echo "Missing url argument to connect to..."
+    exit -1
+fi
+
+if [ ! -z "$VERBOSE" ]; then
+    echo "Using ApiKey: ****${HURL_APIKEY:(-4)}"
+    echo "Using Secret: ****${HURL_SECRET:(-4)}"
+    echo "Using Arguments: $ARGS"
+    echo "Executing: java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey ****${HURL_APIKEY:(-4)} --secretKey ****${HURL_SECRET:(-4)} $ARGS"
+fi
+
+java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS
