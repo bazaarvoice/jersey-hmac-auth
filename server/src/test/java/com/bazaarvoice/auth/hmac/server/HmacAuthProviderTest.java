@@ -1,7 +1,7 @@
 package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
-import com.bazaarvoice.auth.hmac.common.RequestConstants;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -25,6 +25,7 @@ public class HmacAuthProviderTest extends JerseyTest {
     private static final String GOOD_API_KEY = "good-api-key";
     private static final String BAD_API_KEY = "bad-api-key";
     private static final String INTERNAL_ERROR = "internal-error";
+    private RequestConfiguration requestConfiguration;
 
     @Path("/auth")
     @Produces(MediaType.TEXT_PLAIN)
@@ -49,6 +50,11 @@ public class HmacAuthProviderTest extends JerseyTest {
 
     @Override
     protected AppDescriptor configure() {
+        this.requestConfiguration = RequestConfiguration.builder().withApiKeyQueryParamName("passkey")
+                .withSignatureHttpHeader("duck-duck-signature-header")
+                .withTimestampHttpHeader("duck-duck-timestamp-header")
+                .withVersionHttpHeader("duck-duck-version-header")
+                .build();
         final Authenticator<String> authenticator = new Authenticator<String>() {
             @Override
             public String authenticate(Credentials credentials) {
@@ -63,7 +69,7 @@ public class HmacAuthProviderTest extends JerseyTest {
         };
 
         ResourceConfig config = new ScanningResourceConfig();
-        config.getSingletons().add(new HmacAuthProvider<>(new DefaultRequestHandler<>(authenticator)));
+        config.getSingletons().add(new HmacAuthProvider<>(new DefaultRequestHandler<>(authenticator, requestConfiguration)));
         config.getSingletons().add(new AuthResource());
         return new LowLevelAppDescriptor.Builder(config).build();
     }
@@ -131,10 +137,10 @@ public class HmacAuthProviderTest extends JerseyTest {
 
     private String get(String apiKey, boolean authRequired) {
         return client().resource(chooseEndpoint(authRequired))
-                .queryParam(RequestConstants.API_KEY_QUERY_PARAM, apiKey)
-                .header(RequestConstants.SIGNATURE_HTTP_HEADER, "signature")
-                .header(RequestConstants.TIMESTAMP_HTTP_HEADER, "timestamp")
-                .header(RequestConstants.VERSION_HTTP_HEADER, Version.V1)
+                .queryParam(this.requestConfiguration.getApiKeyQueryParamName(), apiKey)
+                .header(this.requestConfiguration.getSignatureHttpHeader(), "signature")
+                .header(this.requestConfiguration.getTimestampHttpHeader(), "timestamp")
+                .header(this.requestConfiguration.getVersionHttpHeader(), Version.V1)
                 .get(String.class);
     }
 
@@ -166,10 +172,10 @@ public class HmacAuthProviderTest extends JerseyTest {
 
     private String post(String apiKey, String content) {
         return client().resource("/auth")
-                .queryParam(RequestConstants.API_KEY_QUERY_PARAM, apiKey)
-                .header(RequestConstants.SIGNATURE_HTTP_HEADER, "signature")
-                .header(RequestConstants.TIMESTAMP_HTTP_HEADER, "timestamp")
-                .header(RequestConstants.VERSION_HTTP_HEADER, Version.V1)
+                .queryParam(this.requestConfiguration.getApiKeyQueryParamName(), apiKey)
+                .header(this.requestConfiguration.getSignatureHttpHeader(), "signature")
+                .header(this.requestConfiguration.getTimestampHttpHeader(), "timestamp")
+                .header(this.requestConfiguration.getVersionHttpHeader(), Version.V1)
                 .entity(content)
                 .post(String.class);
     }

@@ -1,7 +1,7 @@
 package com.bazaarvoice.auth.hmac.client;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
-import com.bazaarvoice.auth.hmac.common.RequestConstants;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
@@ -26,9 +26,15 @@ import java.net.URI;
  */
 public abstract class ValidatingHttpServer implements Container {
     private int port;
+    private final RequestConfiguration requestConfiguration;
 
     protected ValidatingHttpServer(int port) {
+        this(port, new RequestConfiguration());
+    }
+
+    public ValidatingHttpServer(int port, RequestConfiguration requestConfiguration) {
         this.port = port;
+        this.requestConfiguration = requestConfiguration;
     }
 
     protected abstract void validate(Credentials credentials) throws Exception;
@@ -40,7 +46,7 @@ public abstract class ValidatingHttpServer implements Container {
             body = response.getPrintStream();
 
             // Validate the request credentials
-            Credentials credentials = Decoder.decode(request);
+            Credentials credentials = Decoder.decode(request, this.requestConfiguration);
             validate(credentials);
 
             // And we're done
@@ -71,24 +77,24 @@ public abstract class ValidatingHttpServer implements Container {
     }
 
     private static class Decoder {
-        private static Credentials decode(Request request) {
+        private static Credentials decode(Request request, RequestConfiguration requestConfiguration) {
             return Credentials.builder()
-                    .withApiKey(getApiKey(request))
-                    .withSignature(getSignature(request))
+                    .withApiKey(getApiKey(request, requestConfiguration))
+                    .withSignature(getSignature(request, requestConfiguration))
                     .withPath(getPath(request))
-                    .withTimestamp(getTimestamp(request))
+                    .withTimestamp(getTimestamp(request, requestConfiguration))
                     .withContent(getContent(request))
                     .withMethod(getMethod(request))
                     .withVersion(Version.V1)
                     .build();
         }
 
-        private static String getApiKey(Request request) {
-            return request.getQuery().get(RequestConstants.API_KEY_QUERY_PARAM);
+        private static String getApiKey(Request request, RequestConfiguration requestConfiguration) {
+            return request.getQuery().get(requestConfiguration.getApiKeyQueryParamName());
         }
 
-        private static String getSignature(Request request) {
-            return request.getValue(RequestConstants.SIGNATURE_HTTP_HEADER);
+        private static String getSignature(Request request, RequestConfiguration requestConfiguration) {
+            return request.getValue(requestConfiguration.getSignatureHttpHeader());
         }
 
         private static String getPath(Request request) {
@@ -96,8 +102,8 @@ public abstract class ValidatingHttpServer implements Container {
             return request.getTarget();
         }
 
-        private static String getTimestamp(Request request) {
-            return request.getValue(RequestConstants.TIMESTAMP_HTTP_HEADER);
+        private static String getTimestamp(Request request, RequestConfiguration requestConfiguration) {
+            return request.getValue(requestConfiguration.getTimestampHttpHeader());
         }
 
         private static byte[] getContent(Request request) {

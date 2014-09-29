@@ -1,6 +1,7 @@
 package com.bazaarvoice.auth.hmac.client;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -47,7 +48,14 @@ public class HmacClientFilterTest {
 
         Connection connection = null;
         try {
-            ValidatingHttpServer server = new ValidatingHttpServer(port) {
+            RequestConfiguration requestConfiguration = RequestConfiguration.builder()
+                    .withApiKeyQueryParamName("passkey")
+                    .withSignatureHttpHeader("duck-duck-signature-header")
+                    .withTimestampHttpHeader("duck-duck-timestamp-header")
+                    .withVersionHttpHeader("duck-duck-version-header")
+                    .build();
+
+            ValidatingHttpServer server = new ValidatingHttpServer(port, requestConfiguration) {
                 @Override
                 protected void validate(Credentials credentials) throws Exception {
                     validateApiKey(credentials);
@@ -93,7 +101,7 @@ public class HmacClientFilterTest {
 
             // Send a request to the server. If validation does not succeed, an exception will be thrown.
             Client client = Client.create();
-            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers(), requestConfiguration));
             client.resource(server.getUri()).put(content);
 
         } finally {
@@ -130,12 +138,18 @@ public class HmacClientFilterTest {
         Connection connection = null;
         try {
             // Start the server
-            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            RequestConfiguration requestConfiguration =
+                RequestConfiguration.builder().withApiKeyQueryParamName("passkey")
+                        .withSignatureHttpHeader("duck-duck-signature-header")
+                        .withTimestampHttpHeader("duck-duck-timestamp-header")
+                        .withVersionHttpHeader("duck-duck-version-header")
+                        .build();
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey, requestConfiguration);
             connection = server.connect();
 
             // Create a client with the filter that is under test
             Client client = createClient();
-            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers(), requestConfiguration));
             client.addFilter(new GZIPContentEncodingFilter(true));
 
             // Send a pizza in the request body
@@ -157,12 +171,20 @@ public class HmacClientFilterTest {
         Connection connection = null;
         try {
             // Start the server
-            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            RequestConfiguration requestConfiguration =
+                    RequestConfiguration.builder()
+                            .withApiKeyQueryParamName("passkey")
+                            .withSignatureHttpHeader("duck-duck-signature-header")
+                            .withTimestampHttpHeader("duck-duck-timestamp-header")
+                            .withVersionHttpHeader("duck-duck-version-header")
+                            .build();
+
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey, requestConfiguration);
             connection = server.connect();
 
             // Create a client with the filter that is under test
             Client client = createClient();
-            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers(),requestConfiguration));
 
             // Send some random binary data in the request body
             byte[] binaryData = new byte[2];
@@ -183,12 +205,19 @@ public class HmacClientFilterTest {
         Connection connection = null;
         try {
             // Start the server
-            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey);
+            RequestConfiguration requestConfiguration =
+                    RequestConfiguration.builder()
+                            .withApiKeyQueryParamName("passkey")
+                            .withSignatureHttpHeader("duck-duck-signature-header")
+                            .withTimestampHttpHeader("duck-duck-timestamp-header")
+                            .withVersionHttpHeader("duck-duck-version-header")
+                            .build();
+            ValidatingHttpServer server = new SignatureValidatingHttpServer(port, secretKey, requestConfiguration);
             connection = server.connect();
 
             // Create a client with the filter that is under test
             Client client = createClient();
-            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+            client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers(), requestConfiguration));
 
             // Send the request to a path other than "/" and that also includes an additional query parameter
             URI uri = UriBuilder.fromUri(server.getUri())

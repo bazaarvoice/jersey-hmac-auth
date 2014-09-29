@@ -1,6 +1,7 @@
 package com.bazaarvoice.auth.hmac.server;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.server.exception.InternalServerException;
 import com.bazaarvoice.auth.hmac.server.exception.NotAuthorizedException;
 import com.google.common.annotations.VisibleForTesting;
@@ -21,7 +22,11 @@ public class OptionalRequestHandler<Principal> implements RequestHandler<Princip
     private final Authenticator<Principal> authenticator;
 
     public OptionalRequestHandler(Authenticator<Principal> authenticator) {
-        this(new RequestDecoder(), authenticator);
+        this(new RequestDecoder(new RequestConfiguration()), authenticator);
+    }
+
+    public OptionalRequestHandler(Authenticator<Principal> authenticator, RequestConfiguration requestConfiguration) {
+        this(new RequestDecoder(requestConfiguration), authenticator);
     }
 
     @VisibleForTesting
