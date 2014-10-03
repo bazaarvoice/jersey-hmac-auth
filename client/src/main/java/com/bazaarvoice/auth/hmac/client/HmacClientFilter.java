@@ -1,5 +1,6 @@
 package com.bazaarvoice.auth.hmac.client;
 
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
@@ -20,19 +21,34 @@ public class HmacClientFilter extends ClientFilter {
     private final RequestEncoder requestEncoder;
 
     /**
-     * Create a filter that will encode every request that is made by the Jersey client that is
+     * Create a filter that will encode every request that is made by the Jersey client
      * using this filter.
      *
      * @param apiKey the API key
      * @param secretKey the secret key
-     * @param messageBodyWorkers the {@link MessageBodyWorkers} utilized by the client
+     * @param messageBodyWorkers the {@link MessageBodyWorkers} used by the client
      */
     public HmacClientFilter(String apiKey, String secretKey, MessageBodyWorkers messageBodyWorkers) {
-        this(apiKey, secretKey, messageBodyWorkers, null);
+        this(apiKey, secretKey, messageBodyWorkers, null, new RequestConfiguration());
     }
 
+
     /**
-     * Create a filter that will encode every request that is made to the specified
+     * Create a filter that will encode every request that is made by the Jersey client
+     * using this filter.
+     *
+     * @param apiKey the API key
+     * @param secretKey the secret key
+     * @param messageBodyWorkers the {@link MessageBodyWorkers} used by the client
+     * @param requestConfiguration your settings for this Jersey client
+     */
+    public HmacClientFilter(String apiKey, String secretKey, MessageBodyWorkers messageBodyWorkers, RequestConfiguration requestConfiguration) {
+        this(apiKey, secretKey, messageBodyWorkers, null, requestConfiguration);
+    }
+
+
+    /**
+     * Create a filter that will encode every request made to the specified
      * endpoint. This is useful if the Jersey client to which this filter is applied
      * is used to invoke other services as well, ensuring that the specified API key
      * and secret keys are used to secure only the requests that are made to the given
@@ -47,12 +63,32 @@ public class HmacClientFilter extends ClientFilter {
      * @param endpointToSecure the endpoint {@link URI} to secure with this filter
      */
     public HmacClientFilter(String apiKey, String secretKey, MessageBodyWorkers messageBodyWorkers, URI endpointToSecure) {
+        this(apiKey, secretKey, messageBodyWorkers, endpointToSecure, new RequestConfiguration());
+    }
+
+    /**
+     * Create a filter that will encode every request made to the specified
+     * endpoint. This is useful if the Jersey client to which this filter is applied
+     * is used to invoke other services as well, ensuring that the specified API key
+     * and secret keys are used to secure only the requests that are made to the given
+     * endpoint.
+     * <p>
+     * The portion of the endpoint {@link URI} that is used is the "authority" of the URI, which
+     * is essentially just the host and port, or just the host if there is no port specified.
+     *
+     * @param apiKey the API key
+     * @param secretKey the secret key
+     * @param messageBodyWorkers the {@link MessageBodyWorkers} utilized by the client
+     * @param endpointToSecure the endpoint {@link URI} to secure with this filter
+     * @param requestConfiguration your settings for this endpoint.
+     */
+    public HmacClientFilter(String apiKey, String secretKey, MessageBodyWorkers messageBodyWorkers, URI endpointToSecure, RequestConfiguration requestConfiguration) {
         checkNotNull(apiKey, "apiKey");
         checkNotNull(secretKey, "secretKey");
         checkNotNull(messageBodyWorkers, "messageBodyWorkers");
 
         this.endpointToSecure = endpointToSecure;
-        this.requestEncoder = new RequestEncoder(apiKey, secretKey, messageBodyWorkers, new SignatureGenerator());
+        this.requestEncoder = new RequestEncoder(apiKey, secretKey, messageBodyWorkers, new SignatureGenerator(), requestConfiguration);
     }
 
     @Override

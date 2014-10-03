@@ -1,6 +1,6 @@
 package com.bazaarvoice.auth.hmac.client;
 
-import com.bazaarvoice.auth.hmac.common.RequestConstants;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.TimeUtils;
 import com.bazaarvoice.auth.hmac.common.Version;
@@ -23,16 +23,19 @@ public class RequestEncoder extends RequestWriter {
     private final String apiKey;
     private final String secretKey;
     private final SignatureGenerator signatureGenerator;
+    private final RequestConfiguration requestConfiguration;
 
     public RequestEncoder(String apiKey,
                           String secretKey,
                           MessageBodyWorkers messageBodyWorkers,
-                          SignatureGenerator signatureGenerator) {
+                          SignatureGenerator signatureGenerator,
+                          RequestConfiguration requestConfiguration) {
 
         super(messageBodyWorkers);
         this.apiKey = apiKey;
         this.secretKey = secretKey;
         this.signatureGenerator = signatureGenerator;
+        this.requestConfiguration = requestConfiguration;
     }
 
     public void encode(ClientRequest request) {
@@ -45,7 +48,7 @@ public class RequestEncoder extends RequestWriter {
 
     private void addApiKey(ClientRequest request) {
         URI uriWithApiKey = UriBuilder.fromUri(request.getURI())
-                .queryParam(RequestConstants.API_KEY_QUERY_PARAM, apiKey)
+                .queryParam(this.requestConfiguration.getApiKeyQueryParamName(), apiKey)
                 .build();
 
         request.setURI(uriWithApiKey);
@@ -53,15 +56,15 @@ public class RequestEncoder extends RequestWriter {
 
     private void addSignature(ClientRequest request, String timestamp) {
         String signature = buildSignature(request, timestamp);
-        request.getHeaders().putSingle(RequestConstants.SIGNATURE_HTTP_HEADER, signature);
+        request.getHeaders().putSingle(this.requestConfiguration.getSignatureHttpHeader(), signature);
     }
 
     private void addTimestamp(ClientRequest request, String timestamp) {
-        request.getHeaders().putSingle(RequestConstants.TIMESTAMP_HTTP_HEADER, timestamp);
+        request.getHeaders().putSingle(this.requestConfiguration.getTimestampHttpHeader(), timestamp);
     }
 
     private void addVersion(ClientRequest request, Version version) {
-        request.getHeaders().putSingle(RequestConstants.VERSION_HTTP_HEADER, version.toString());
+        request.getHeaders().putSingle(this.requestConfiguration.getVersionHttpHeader(), version.toString());
     }
 
     private String buildSignature(ClientRequest request, String timestamp) {

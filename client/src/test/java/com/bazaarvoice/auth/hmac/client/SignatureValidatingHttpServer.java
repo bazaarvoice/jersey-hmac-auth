@@ -1,6 +1,7 @@
 package com.bazaarvoice.auth.hmac.client;
 
 import com.bazaarvoice.auth.hmac.common.Credentials;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 
 /**
@@ -10,9 +11,13 @@ import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 public class SignatureValidatingHttpServer extends ValidatingHttpServer {
     private final String secretKey;
 
-    protected SignatureValidatingHttpServer(int port, String secretKey) {
-        super(port);
+    protected SignatureValidatingHttpServer(int port, String secretKey, RequestConfiguration requestConfiguration) {
+        super(port, requestConfiguration);
         this.secretKey = secretKey;
+    }
+
+    protected SignatureValidatingHttpServer(int port, String secretKey) {
+        this(port, secretKey, new RequestConfiguration());
     }
 
     @Override

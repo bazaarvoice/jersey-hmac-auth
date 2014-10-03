@@ -1,6 +1,7 @@
 package com.bazaarvoice.auth.hmac.cli;
 
 import com.bazaarvoice.auth.hmac.client.HmacClientFilter;
+import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -34,6 +35,11 @@ public class HurlCli {
         contentTypes.addArgument("-C", "--content-type").help("Content type to send in the Content-Type request header");
         contentTypes.addArgument("-J", "--json").dest("content_type").setConst("application/json").action(storeConst()).help("Specifies application/json in the Content-Type request header");
 
+        parser.addArgument("--headerSignature").setDefault(RequestConfiguration.DEFAULT_SIGNATURE_HTTP_HEADER).help("Override the http header");
+        parser.addArgument("--headerTimestamp").setDefault(RequestConfiguration.DEFAULT_TIMESTAMP_HTTP_HEADER).help("Override the timestamp header");
+        parser.addArgument("--headerVersion").setDefault(RequestConfiguration.DEFAULT_VERSION_HTTP_HEADER).help("Override the version header");
+        parser.addArgument("--apiKeyParamName").setDefault(RequestConfiguration.DEFAULT_API_KEY_QUERY_PARAM).help("Override the API KEY query parameter name");
+
         parser.addArgument("url").required(true);
 
         try {
@@ -47,7 +53,14 @@ public class HurlCli {
 
             byte[] data = getData(ns.getString("data"));
 
-            String payload = run(method, url, apiKey, secretKey, data, contentType, verbose);
+            final RequestConfiguration requestConfiguration = RequestConfiguration.builder()
+                    .withSignatureHttpHeader(ns.getString("headerSignature"))
+                    .withTimestampHttpHeader(ns.getString("headerTimestamp"))
+                    .withVersionHttpHeader(ns.getString("headerVersion"))
+                    .withApiKeyQueryParamName(ns.getString("apiKeyParamName"))
+                    .build();
+
+            String payload = run(method, url, apiKey, secretKey, data, contentType, verbose, requestConfiguration);
 
             if (payload != null) {
                 System.out.println(payload); // TODO: do we want this newline?  may screw up binary data... but do we want to use Strings then?
@@ -84,8 +97,9 @@ public class HurlCli {
         }
     }
 
-    private static String run(String method, String url, String apiKey, String secretKey, byte[] requestData, String contentType, boolean verbose) {
-        Client client = createClient(apiKey, secretKey);
+    private static String run(String method, String url, String apiKey, String secretKey, byte[] requestData,
+                              String contentType, boolean verbose, RequestConfiguration requestConfiguration) {
+        Client client = createClient(apiKey, secretKey, requestConfiguration);
 
         if (verbose) {
             System.err.printf("method: %s, api key: '%s', url: '%s'%n", method, apiKey, url);
@@ -113,9 +127,9 @@ public class HurlCli {
         }
     }
 
-    private static Client createClient(String apiKey, String secretKey) {
+    private static Client createClient(String apiKey, String secretKey, RequestConfiguration requestConfiguration) {
         Client client = Client.create();
-        client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers()));
+        client.addFilter(new HmacClientFilter(apiKey, secretKey, client.getMessageBodyWorkers(), requestConfiguration));
         return client;
     }
 }
