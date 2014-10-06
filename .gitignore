@@ -17,3 +17,6 @@ reports/
 
 # OS hidden files
 .DS_Store
+
+# ignore release.properties during commit phase of maven-release-plugin:prepare
+release.properties
