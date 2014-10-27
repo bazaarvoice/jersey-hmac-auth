@@ -35,11 +35,11 @@ while [[ $# > 0 ]]; do
 	    ARGS="$ARGS $key"
 	    ;;
 	    -a|--api-key)
-	    HURL_API_KEY="$1"
+	    HURL_APIKEY="$1"
 	    shift
 	    ;;
 	    -s|--secret-key)
-	    HURL_SECRET_KEY="$1"
+	    HURL_SECRET="$1"
 	    shift
 	    ;;
 	    -c|--configure)
@@ -58,13 +58,13 @@ done
 if [ ! -f ~/.hurl/$HURL_PROFILE.conf ]; then
 	[[ ! -z "$VERBOSE" ]] && echo "~/.hurl/$HURL_PROFILE.conf not found, using env variables"
 else
-	[[ -z "$HURL_API_KEY" ]] && export HURL_API_KEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
-	[[ -z "$HURL_SECRET_KEY" ]] && export HURL_SECRET_KEY="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+	[[ -z "$HURL_APIKEY" ]] && export HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+	[[ -z "$HURL_SECRET" ]] && export HURL_SECRET="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
 fi
 
-if [[ -z "$HURL_API_KEY" || -z "$HURL_SECRET_KEY" || ! -z $CONFIGURE ]]; then
-	echo -n "Enter Hurl ApiKey [**** ${HURL_API_KEY:(-4)}]: " && read HURL_API_KEY
-    echo -n "Enter Hurl Secret [**** ${HURL_SECRET_KEY:(-4)}]: " && read HURL_SECRET_KEY
+if [[ -z "$HURL_APIKEY" || -z "$HURL_SECRET" || ! -z $CONFIGURE ]]; then
+	echo -n "Enter Hurl ApiKey [**** ${HURL_APIKEY:(-4)}]: " && read HURL_APIKEY
+    echo -n "Enter Hurl Secret [**** ${HURL_SECRET:(-4)}]: " && read HURL_SECRET
 fi
 
 ARGS=$(echo ${ARGS} | sed -e 's/^ *//g;s/ *$//g')
@@ -75,10 +75,10 @@ if [ -z "$ARGS" ]; then
 fi
 
 if [ ! -z "$VERBOSE" ]; then
-	echo "Using ApiKey: ****${HURL_API_KEY:(-4)}"
-	echo "Using Secret: ****${HURL_SECRET_KEY:(-4)}"
+	echo "Using ApiKey: ****${HURL_APIKEY:(-4)}"
+	echo "Using Secret: ****${HURL_SECRET:(-4)}"
 	echo "Using Arguments: $ARGS"
-	echo "Executing: java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_API_KEY" --secretKey "$HURL_SECRET_KEY" $ARGS"
+	echo "Executing: java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS"
 fi
 
-java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_API_KEY" --secretKey "$HURL_SECRET_KEY" $ARGS
+java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS
