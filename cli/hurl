@@ -15,6 +15,9 @@ OPTIONS:
    -s      secret key
    -c      configure a current session to use a temp apikey/secret
    -v      verbose mode
+
+------------------------------------------
+
 EOF
 }
 
