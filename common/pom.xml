@@ -14,6 +14,10 @@
 
     <description>Common code for the Client and Server modules</description>
 
+    <properties>
+        <java.minimum.version>1.6</java.minimum.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
