@@ -27,7 +27,7 @@ public class DefaultRequestHandlerTest {
     public void setUp() {
         decoder = mock(RequestDecoder.class);
         authenticator = mock(Authenticator.class);
-        handler = new DefaultRequestHandler<>(decoder, authenticator);
+        handler = new DefaultRequestHandler<String>(decoder, authenticator);
     }
 
     @Test(expected = NotAuthorizedException.class)

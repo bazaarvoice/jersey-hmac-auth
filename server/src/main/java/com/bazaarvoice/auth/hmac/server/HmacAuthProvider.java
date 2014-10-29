@@ -22,7 +22,7 @@ public class HmacAuthProvider<T> implements InjectableProvider<HmacAuth, Paramet
 
     @Override
     public Injectable getInjectable(ComponentContext componentContext, HmacAuth hmacAuth, Parameter parameter) {
-        return new HmacAuthInjectable<>(requestHandler);
+        return new HmacAuthInjectable<T>(requestHandler);
     }
 
     private static class HmacAuthInjectable<T> extends AbstractHttpContextInjectable<T> {

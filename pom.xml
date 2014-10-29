@@ -24,6 +24,7 @@
     <properties>
         <jersey.version>1.17.1</jersey.version>
         <slf4j.version>1.7.5</slf4j.version>
+        <java.minimum.version>1.6</java.minimum.version>
     </properties>
 
     <build>

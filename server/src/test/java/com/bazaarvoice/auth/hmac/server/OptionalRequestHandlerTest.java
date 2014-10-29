@@ -28,7 +28,7 @@ public class OptionalRequestHandlerTest {
     public void setUp() {
         decoder = mock(RequestDecoder.class);
         authenticator = mock(Authenticator.class);
-        handler = new OptionalRequestHandler<>(decoder, authenticator);
+        handler = new OptionalRequestHandler<String>(decoder, authenticator);
     }
 
     @Test

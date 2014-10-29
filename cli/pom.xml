@@ -14,11 +14,6 @@
 
     <description>CLI interface for dealing with jersey-hmac-auth protected APIs</description>
 
-
-    <properties>
-        <java.minimum.version>1.6</java.minimum.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
