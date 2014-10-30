@@ -61,13 +61,13 @@ done
 if [ ! -f ~/.hurl/$HURL_PROFILE.conf ]; then
 	[[ ! -z "$VERBOSE" ]] && echo "~/.hurl/$HURL_PROFILE.conf not found, using env variables"
 else
-	[[ -z "$HURL_APIKEY" ]] && export HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
-	[[ -z "$HURL_SECRET" ]] && export HURL_SECRET="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+	[[ -z "$HURL_APIKEY" ]] && HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+	[[ -z "$HURL_SECRET" ]] && HURL_SECRET="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
 fi
 
 if [[ -z "$HURL_APIKEY" || -z "$HURL_SECRET" || ! -z $CONFIGURE ]]; then
-	echo -n "Enter Hurl ApiKey [**** ${HURL_APIKEY:(-4)}]: " && read HURL_APIKEY
-    echo -n "Enter Hurl Secret [**** ${HURL_SECRET:(-4)}]: " && read HURL_SECRET
+	echo -n "Enter Hurl ApiKey [****${HURL_APIKEY:(-4)}]: " && read HURL_APIKEY
+    echo -n "Enter Hurl Secret [****${HURL_SECRET:(-4)}]: " && read HURL_SECRET
 fi
 
 ARGS=$(echo ${ARGS} | sed -e 's/^ *//g;s/ *$//g')
@@ -81,7 +81,7 @@ if [ ! -z "$VERBOSE" ]; then
 	echo "Using ApiKey: ****${HURL_APIKEY:(-4)}"
 	echo "Using Secret: ****${HURL_SECRET:(-4)}"
 	echo "Using Arguments: $ARGS"
-	echo "Executing: java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS"
+	echo "Executing: java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey ****${HURL_APIKEY:(-4)} --secretKey ****${HURL_SECRET:(-4)} $ARGS"
 fi
 
 java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS
