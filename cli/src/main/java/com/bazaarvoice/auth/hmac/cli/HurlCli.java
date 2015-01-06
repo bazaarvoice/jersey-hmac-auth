@@ -29,7 +29,7 @@ public class HurlCli {
         parser.addArgument("--apiKey").required(true);
         parser.addArgument("--secretKey").required(true);
         parser.addArgument("-v", "--verbose").action(storeTrue()).help("Prints additional information to stderr");
-        parser.addArgument("--data", "--data-binary").required(false).help("The data to use in a POST (or @filename for a file full of data)");
+        parser.addArgument("-d", "--data", "--data-binary").required(false).help("The data to use in a POST (or @filename for a file full of data)");
 
         MutuallyExclusiveGroup contentTypes = parser.addMutuallyExclusiveGroup();
         contentTypes.addArgument("-C", "--content-type").help("Content type to send in the Content-Type request header");
