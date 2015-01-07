@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 
 /**
- * AnnotationType relaxed implementation of a <code>RequestHandler</code>, which does not require a request
+ * A relaxed implementation of a <code>RequestHandler</code>, which does not require a request
  * to contain authentication credentials, but still validates credentials if provided.
  *
  * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})

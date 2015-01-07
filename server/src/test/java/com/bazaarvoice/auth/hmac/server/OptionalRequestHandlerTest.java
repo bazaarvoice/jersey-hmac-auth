@@ -35,7 +35,7 @@ public class OptionalRequestHandlerTest {
     public void setUp() {
         decoder = mock(RequestDecoder.class);
         authenticator = mock(Authenticator.class);
-        handler = new OptionalRequestHandler<String>(decoder, authenticator);
+        handler = new OptionalRequestHandler<HmacAuth, String>(decoder, authenticator);
     }
 
     @Test

@@ -13,7 +13,7 @@ public class PassThroughRequestHandlerTest {
     @Test
     public void testPassThroughHandlerWithValue() {
         String expected = "STRING";
-        PassThroughRequestHandler<HmacAuth, String> handler = new PassThroughRequestHandler<>(expected);
+        PassThroughRequestHandler<HmacAuth, String> handler = new PassThroughRequestHandler<HmacAuth, String>(expected);
         String value = handler.handle(null, request);
         assertNotNull(value);
         assertEquals(expected, value);

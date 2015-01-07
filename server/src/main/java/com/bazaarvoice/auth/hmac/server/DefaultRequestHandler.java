@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 
 /**
- * AnnotationType strict implementation of a <code>RequestHandler</code>, which requires all requests to an annotated
+ * A strict implementation of a <code>RequestHandler</code>, which requires all requests to an annotated
  * endpoint to contain valid authentication credentials.
  *
  * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})
@@ -26,7 +26,11 @@ public class DefaultRequestHandler<AnnotationType extends Annotation, PrincipalT
     private final Authorizer<AnnotationType, PrincipalType> authorizer;
 
     public DefaultRequestHandler(Authenticator<PrincipalType> authenticator) {
-        this(authenticator, null);
+        this(authenticator, new AllAuthorizer<AnnotationType, PrincipalType>());
+    }
+
+    public DefaultRequestHandler(Authenticator<PrincipalType> authenticator, RequestConfiguration requestConfiguration) {
+        this(new RequestDecoder(requestConfiguration), authenticator, new AllAuthorizer<AnnotationType, PrincipalType>());
     }
 
     public DefaultRequestHandler(Authenticator<PrincipalType> authenticator, Authorizer<AnnotationType, PrincipalType> authorizer) {
@@ -50,7 +54,7 @@ public class DefaultRequestHandler<AnnotationType extends Annotation, PrincipalT
             Credentials credentials = requestDecoder.decode(request);
             PrincipalType principal = authenticator.authenticate(credentials);
 
-            if (principal != null && (authorizer == null || authorizer.authorize(annotation, principal))) {
+            if (principal != null && authorizer.authorize(annotation, principal)) {
                 return principal;
             }
         } catch (IllegalArgumentException e) {

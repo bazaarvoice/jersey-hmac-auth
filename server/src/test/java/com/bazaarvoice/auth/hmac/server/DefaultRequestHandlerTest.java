@@ -39,7 +39,7 @@ public class DefaultRequestHandlerTest {
 
         authorizer = mock(Authorizer.class);
         when(authorizer.authorize(any(HmacAuth.class), anyString())).thenReturn(true);
-        handler = new DefaultRequestHandler<String>(decoder, authenticator, authorizer);
+        handler = new DefaultRequestHandler<HmacAuth, String>(decoder, authenticator, authorizer);
     }
 
     @Test(expected = NotAuthorizedException.class)

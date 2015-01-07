@@ -30,7 +30,7 @@ public abstract class HmacAuthProvider<AnnotationType extends Annotation, Princi
 
     @Override
     public Injectable getInjectable(ComponentContext componentContext, AnnotationType annotation, Parameter parameter) {
-        return new HmacAuthInjectable<PrincipalType>(annotation, requestHandler);
+        return new HmacAuthInjectable<AnnotationType, PrincipalType>(annotation, requestHandler);
     }
 
     private static class HmacAuthInjectable<AnnotationType extends Annotation, PrincipalType> extends AbstractHttpContextInjectable<PrincipalType> {

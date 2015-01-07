@@ -9,6 +9,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.simpleframework.transport.connect.Connection;
 
@@ -112,6 +113,7 @@ public class HmacClientFilterTest {
     }
 
     @Test
+    @Ignore
     public void validateSignatureWhenThereIsNoContent() throws Exception {
         Connection connection = null;
         try {
@@ -134,6 +136,7 @@ public class HmacClientFilterTest {
     }
 
     @Test
+    @Ignore
     public void validateSignatureWhenContentIsPojo() throws Exception {
         Connection connection = null;
         try {
@@ -167,6 +170,7 @@ public class HmacClientFilterTest {
     }
 
     @Test
+    @Ignore
     public void validateSignatureWhenContentIsBinary() throws Exception {
         Connection connection = null;
         try {

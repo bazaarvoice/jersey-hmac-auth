@@ -7,7 +7,7 @@ import com.sun.jersey.api.core.HttpRequestContext;
 import java.lang.annotation.Annotation;
 
 /**
- * AnnotationType fake <code>RequestHandler</code> that simply returns the value specified at construction.
+ * A fake <code>RequestHandler</code> that simply returns the value specified at construction.
  * Most useful for testing purposes.
  *
  * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})

@@ -38,7 +38,7 @@ For example:
 @Produces(MediaType.TEXT_PLAIN)
 public class PizzaResource {
     @GET
-    public String get(@HmacAuth Principal principal) {
+    public String get(@HmacAuth PrincipalType principal) {
         // This gets control only if the request is authenticated. 
         // The principal identifies the API caller (and can be of any type you want).
     }
@@ -50,16 +50,16 @@ Implement an authenticator to authenticate requests:
 Here's an example implementation:
 
 ```java
-public class MyAuthenticator extends AbstractAuthenticator<Principal> {
+public class MyAuthenticator extends AbstractAuthenticator<PrincipalType> {
     // some code is intentially missing 
     
     @Override
-    protected Principal getPrincipal(Credentials credentials) {
+    protected PrincipalType getPrincipal(Credentials credentials) {
         // Return the principal identified by the credentials from the API request
     } 
 
     @Override
-    protected String getSecretKeyFromPrincipal(Principal principal) {
+    protected String getSecretKeyFromPrincipal(PrincipalType principal) {
         // return the secret key for the given principal
     }
 }
