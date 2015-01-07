@@ -21,6 +21,20 @@ OPTIONS:
 EOF
 }
 
+# Figure out where this script lives (follow symbolic links).  Emulate GNU readlink -f.
+function readlink_for_osx() {
+    FILENAME="$1"
+    while true; do
+        cd "$( dirname "$FILENAME" )"
+        FILENAME="$( basename "$FILENAME" )"
+        [ -L "$FILENAME" ] || break
+        FILENAME="$( readlink "$FILENAME" )"
+    done
+    echo "$(pwd -P)/$FILENAME"
+}
+TOOLS_DIR="$( dirname "$( readlink_for_osx "${BASH_SOURCE:-$0}" )" )"
+TOOLS_JAR="$( echo ${TOOLS_DIR}/target/jersey-hmac-auth-cli-*.jar )"
+
 HURL_PROFILE="default"
 ARGS=""
 VERBOSE=""
@@ -35,7 +49,7 @@ while [[ $# > 0 ]]; do
         ;;
         -h|--help)
         usage
-        java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar -h
+        java -jar "${TOOLS_JAR}" -h
         exit 0
         ;;
         -a|--api-key)
@@ -82,7 +96,7 @@ if [ ! -z "$VERBOSE" ]; then
     echo "Using ApiKey: ****${HURL_APIKEY:(-4)}"
     echo "Using Secret: ****${HURL_SECRET:(-4)}"
     echo "Using Arguments: $ARGS"
-    echo "Executing: java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey ****${HURL_APIKEY:(-4)} --secretKey ****${HURL_SECRET:(-4)} $ARGS"
+    echo "Executing: java -jar ${TOOLS_JAR} --apiKey ****${HURL_APIKEY:(-4)} --secretKey ****${HURL_SECRET:(-4)} $ARGS"
 fi
 
-java -jar "$(dirname "$0")"/target/jersey-hmac-auth-cli-*.jar --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS
+java -jar "${TOOLS_JAR}" --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS
