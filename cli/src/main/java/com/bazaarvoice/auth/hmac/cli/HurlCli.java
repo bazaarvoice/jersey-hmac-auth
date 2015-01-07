@@ -10,6 +10,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+import javax.ws.rs.core.HttpHeaders;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -20,6 +21,8 @@ import static net.sourceforge.argparse4j.impl.Arguments.storeConst;
 import static net.sourceforge.argparse4j.impl.Arguments.storeTrue;
 
 public class HurlCli {
+    private static final String USER_AGENT = "hurl/" + HurlCli.class.getPackage().getImplementationVersion();
+
     public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("hurl")
             .description("Like curl, for hmac-protected resources")
@@ -109,8 +112,10 @@ public class HurlCli {
         }
 
         WebResource.Builder request = client.resource(url).getRequestBuilder();
+        request.header(HttpHeaders.USER_AGENT, USER_AGENT);
+
         if (contentType != null && contentType.length() > 0) {
-            request.header("Content-Type", contentType);
+            request.header(HttpHeaders.CONTENT_TYPE, contentType);
         }
 
         if ("POST".equalsIgnoreCase(method)) {
