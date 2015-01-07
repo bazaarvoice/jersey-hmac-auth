@@ -17,12 +17,12 @@ public enum UserRole {
         return _rights;
     }
 
-    public boolean hasRight(UserRight... rights) {
+    public boolean hasRights(UserRight... rights) {
         for (UserRight right : rights) {
-            if (_rights.contains(right)) {
-                return true;
+            if (!_rights.contains(right)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

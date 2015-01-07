@@ -10,65 +10,16 @@ HMAC authentication provides a way for you to ensure the integrity and authentic
 API access to permitted callers by giving each one an API key and a secret key that they use when generating requests.
 You can use this library to add support for HMAC authentication on the client and server.
 
-
 ## Getting Started
-
-### Server Side
-
-Add this maven dependency:
-
-How does it work?
-=================
-
-The following is the protocol for authenticating requests:
-
-(1) The client is granted an API key and secret key.
-
-(2) The client generates a request as follows:
-
-```
-GET /pizza?apiKey=my-api-key HTTP/1.1
-X-Auth-Version: 1
-X-Auth-Timestamp: 2014-02-10T06:13:15.402Z
-X-Auth-Signature: yrVWPUAPAlV0sgAh22MYU-zR5unaoTrNTaTl11XjoMs=
-```
-
-The signature specified by the `X-Auth-Signature` header is created as follows. It is constructed using the secret key and
-various request parameters:
-  
-```python
-method = {HTTP request method - e.g. GET, PUT, POST}
-timestamp = {the current UTC timestamp in ISO8601 format}
-path = {the request path including all query parameters - e.g. "/pizza?apiKey=my-api-key"}
-content = {the content in the request body, if any is specified on the request}
-
-data = {method + '\n' + timestamp + '\n' + path}
-if content:
-    data += {'\n' + content}
-digest = hmac(secretKey, data.encode('utf-8'), sha256).digest()
-return base64.urlsafe_b64encode(digest).strip()
-```
-  
-(3) The server receives and authenticates the request.
-
-The server uses the API key to identify the caller and retrieve their secret key from where it happens to store it,
-generates a signature just like the client did when building the request, and compares its signature to the one passed
-by the client. If the signatures match, then the request is valid and the API request can be processed. Otherwise, the
-server returns a "401 (Unauthorized)" HTTP status code.
-
-
-Getting Started
-===============
 
 Here's how to implement HMAC authentication for your API. The first section shows how to implement it on the
 server to secure your API, and the subsequent section shows how to implement it in Java or Python clients. Clients
 can be implemented in any other language just so long as they follow the required protocol when building requests.
 
 
-Server
-------
+### Server Side
 
-(1) Add this maven dependency:
+Add this maven dependency:
 
 ```xml
 <dependency>
@@ -148,6 +99,55 @@ client.addFilter(new HmacClientFilter(yourApiKey, yourSecretKey, client.getMessa
 
 See the [User Guide](https://github.com/bazaarvoice/jersey-hmac-auth/wiki) for more details.
 
+
+## Authorization
+
+Extend your use of this library to prevent some users from accessing higher privileged segments of your API. Checkout
+the [sample-authorization](sample-authorization) directory for a completely working template. Instead of using `@HmacAuth`
+you can use any annotation of your choosing and then implement `Authorizer` and pass that into the `DefaultRequestHandler`
+to automatically authorize every request.
+
+(1) Create an Annotation that exposes the required authorization right.
+
+```java
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface SecureRPC {
+    public UserRight[] requiredRights();
+}
+```
+
+Where UserRight, for the sample app, is an enum. Although, you could communicate this information any way you please. The example enum is defined as:
+```java
+public enum UserRight {
+    CREATE_NOTE,
+    DELETE_NOTE,
+    VIEW_NOTES
+}
+```
+
+(2) Annotate your resource(s).
+
+```java
+public Collection<Note> createNote(@SecureRPC(requiredRights = UserRight.CREATE_NOTE) User user, ...
+```
+
+(3) Implement the `Authorizer` interface.
+
+```java
+public class SecureRPCAuthorizer implements Authorizer<SecureRPC, User> {
+    @Override
+    public boolean authorize(final SecureRPC annotation, final User principal) {
+        return principal.hasRights(annotation.requiredRights());
+    }
+}
+```
+
+(4) Register the injectable provider with jersey.
+
+```java
+environment.addProvider(new HmacAuthProvider<SecureRPC, User>(new DefaultRequestHandler<>(new SimpleAuthenticator(), new SecureRPCAuthorizer())) {});
+```
 
 ## Contributing
 
