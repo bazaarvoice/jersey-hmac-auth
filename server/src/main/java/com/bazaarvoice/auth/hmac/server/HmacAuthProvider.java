@@ -8,10 +8,18 @@ import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
 
-public class HmacAuthProvider<T> implements InjectableProvider<HmacAuth, Parameter> {
-    private final RequestHandler<T> requestHandler;
+import java.lang.annotation.Annotation;
 
-    public HmacAuthProvider(RequestHandler<T> requestHandler) {
+/**
+ * An implementation of Jersey's InjectableProvider to perform the actual integration with Jersey.
+ *
+ * @param <A> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <P> the type of principal the handler returns
+ */
+public class HmacAuthProvider<A extends Annotation, P> implements InjectableProvider<A, Parameter> {
+    private final RequestHandler<P> requestHandler;
+
+    public HmacAuthProvider(RequestHandler<P> requestHandler) {
         this.requestHandler = requestHandler;
     }
 
@@ -21,14 +29,14 @@ public class HmacAuthProvider<T> implements InjectableProvider<HmacAuth, Paramet
     }
 
     @Override
-    public Injectable getInjectable(ComponentContext componentContext, HmacAuth hmacAuth, Parameter parameter) {
-        return new HmacAuthInjectable<T>(requestHandler);
+    public Injectable getInjectable(ComponentContext componentContext, A annotation, Parameter parameter) {
+        return new HmacAuthInjectable<P>(requestHandler);
     }
 
     private static class HmacAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
         private final RequestHandler<T> requestHandler;
 
-        private HmacAuthInjectable( RequestHandler<T> requestHandler) {
+        private HmacAuthInjectable(RequestHandler<T> requestHandler) {
             this.requestHandler = requestHandler;
         }
 
