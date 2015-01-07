@@ -17,9 +17,9 @@ import java.lang.annotation.Annotation;
  * @param <P> the type of principal the handler returns
  */
 public abstract class HmacAuthProvider<A extends Annotation, P> implements InjectableProvider<A, Parameter> {
-    private final RequestHandler<P> requestHandler;
+    private final RequestHandler<A, P> requestHandler;
 
-    public HmacAuthProvider(RequestHandler<P> requestHandler) {
+    public HmacAuthProvider(RequestHandler<A, P> requestHandler) {
         this.requestHandler = requestHandler;
     }
 
@@ -30,19 +30,21 @@ public abstract class HmacAuthProvider<A extends Annotation, P> implements Injec
 
     @Override
     public Injectable getInjectable(ComponentContext componentContext, A annotation, Parameter parameter) {
-        return new HmacAuthInjectable<P>(requestHandler);
+        return new HmacAuthInjectable<P>(annotation, requestHandler);
     }
 
-    private static class HmacAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
-        private final RequestHandler<T> requestHandler;
+    private static class HmacAuthInjectable<A extends Annotation, P> extends AbstractHttpContextInjectable<P> {
+        private final A annotation;
+        private final RequestHandler<A, P> requestHandler;
 
-        private HmacAuthInjectable(RequestHandler<T> requestHandler) {
+        private HmacAuthInjectable(A annotation, RequestHandler<A, P> requestHandler) {
+            this.annotation = annotation;
             this.requestHandler = requestHandler;
         }
 
         @Override
-        public T getValue(HttpContext httpContext) {
-            return requestHandler.handle(httpContext.getRequest());
+        public P getValue(HttpContext httpContext) {
+            return requestHandler.handle(annotation, httpContext.getRequest());
         }
     }
 }

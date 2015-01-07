@@ -9,17 +9,20 @@ import com.sun.jersey.api.core.HttpRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
+
 /**
  * A relaxed implementation of a <code>RequestHandler</code>, which does not require a request
  * to contain authentication credentials, but still validates credentials if provided.
  *
- * @param <Principal> the type of principal the handler returns
+ * @param <A> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <P> the type of principal the handler returns
  */
-public class OptionalRequestHandler<Principal> implements RequestHandler<Principal> {
+public class OptionalRequestHandler<A extends Annotation, P> implements RequestHandler<A, P> {
     private static final Logger LOG = LoggerFactory.getLogger(OptionalRequestHandler.class);
 
     private final RequestDecoder requestDecoder;
-    private final Authenticator<Principal> authenticator;
+    private final Authenticator<P> authenticator;
 
     public OptionalRequestHandler(Authenticator<Principal> authenticator) {
         this(new RequestDecoder(new RequestConfiguration()), authenticator);
@@ -30,16 +33,16 @@ public class OptionalRequestHandler<Principal> implements RequestHandler<Princip
     }
 
     @VisibleForTesting
-    OptionalRequestHandler(RequestDecoder requestDecoder, Authenticator<Principal> authenticator) {
+    OptionalRequestHandler(RequestDecoder requestDecoder, Authenticator<P> authenticator) {
         this.requestDecoder = requestDecoder;
         this.authenticator = authenticator;
     }
 
     @Override
-    public Principal handle(HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
+    public P handle(A annotation, HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
         try {
             Credentials credentials = requestDecoder.decode(request);
-            Principal result = authenticator.authenticate(credentials);
+            P result = authenticator.authenticate(credentials);
             if (result != null) {
                 return result;
             }
