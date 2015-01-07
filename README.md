@@ -50,12 +50,12 @@ Implement an authenticator to authenticate requests:
 Here's an example implementation:
 
 ```java
-public class MyAuthenticator extends AbstractAuthenticator<PrincipalType> {
-    // some code is intentially missing 
+public class MyAuthenticator extends AbstractCachingAuthenticator<PrincipalType> {
+    // some code is intentionally missing
     
     @Override
-    protected PrincipalType getPrincipal(Credentials credentials) {
-        // Return the principal identified by the credentials from the API request
+    protected PrincipalType loadPrincipal(Credentials credentials) {
+        // return the principal identified by the credentials from the API request
     } 
 
     @Override
@@ -68,7 +68,7 @@ public class MyAuthenticator extends AbstractAuthenticator<PrincipalType> {
 Register the authenticator with Jersey. For example, using Dropwizard:
 
 ```java
-environment.addProvider(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<HmacAuth, String>(new PizzaAuthenticator())) {});
+environment.addProvider(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<HmacAuth, String>(new MyAuthenticator())) {});
 ```
 
 ### Client Side
@@ -103,9 +103,9 @@ See the [User Guide](https://github.com/bazaarvoice/jersey-hmac-auth/wiki) for m
 ## Authorization
 
 Extend your use of this library to prevent some users from accessing higher privileged segments of your API. Checkout
-the [sample-authorization](sample-authorization) directory for a completely working template. Instead of using `@HmacAuth`
-you can use any annotation of your choosing and then implement `Authorizer` and pass that into the `DefaultRequestHandler`
-to automatically authorize every request.
+the [sample-authorization](sample-authorization) directory for a completely working template. Instead of using
+`@HmacAuth` you can use any annotation of your choosing and then implement `Authorizer` and pass that into the
+`DefaultRequestHandler` to automatically authorize every request.
 
 (1) Create an Annotation that exposes the required authorization right.
 
@@ -117,7 +117,8 @@ public @interface SecureRPC {
 }
 ```
 
-Where UserRight, for the sample app, is an enum. Although, you could communicate this information any way you please. The example enum is defined as:
+Where UserRight, for the sample app, is an enum. Although, you could communicate this information any way you please.
+It is defined as:
 ```java
 public enum UserRight {
     CREATE_NOTE,
