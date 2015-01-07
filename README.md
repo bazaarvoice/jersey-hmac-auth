@@ -17,6 +17,59 @@ You can use this library to add support for HMAC authentication on the client an
 
 Add this maven dependency:
 
+How does it work?
+=================
+
+The following is the protocol for authenticating requests:
+
+(1) The client is granted an API key and secret key.
+
+(2) The client generates a request as follows:
+
+```
+GET /pizza?apiKey=my-api-key HTTP/1.1
+X-Auth-Version: 1
+X-Auth-Timestamp: 2014-02-10T06:13:15.402Z
+X-Auth-Signature: yrVWPUAPAlV0sgAh22MYU-zR5unaoTrNTaTl11XjoMs=
+```
+
+The signature specified by the `X-Auth-Signature` header is created as follows. It is constructed using the secret key and
+various request parameters:
+  
+```python
+method = {HTTP request method - e.g. GET, PUT, POST}
+timestamp = {the current UTC timestamp in ISO8601 format}
+path = {the request path including all query parameters - e.g. "/pizza?apiKey=my-api-key"}
+content = {the content in the request body, if any is specified on the request}
+
+data = {method + '\n' + timestamp + '\n' + path}
+if content:
+    data += {'\n' + content}
+digest = hmac(secretKey, data.encode('utf-8'), sha256).digest()
+return base64.urlsafe_b64encode(digest).strip()
+```
+  
+(3) The server receives and authenticates the request.
+
+The server uses the API key to identify the caller and retrieve their secret key from where it happens to store it,
+generates a signature just like the client did when building the request, and compares its signature to the one passed
+by the client. If the signatures match, then the request is valid and the API request can be processed. Otherwise, the
+server returns a "401 (Unauthorized)" HTTP status code.
+
+
+Getting Started
+===============
+
+Here's how to implement HMAC authentication for your API. The first section shows how to implement it on the
+server to secure your API, and the subsequent section shows how to implement it in Java or Python clients. Clients
+can be implemented in any other language just so long as they follow the required protocol when building requests.
+
+
+Server
+------
+
+(1) Add this maven dependency:
+
 ```xml
 <dependency>
     <groupId>com.bazaarvoice.auth</groupId>
@@ -26,6 +79,8 @@ Add this maven dependency:
 ```
 
 Modify your Jersey resource methods to include a principal annotated with `@HmacAuth`. For example:
+
+For example:
 
 ```java
 @Path("/pizza")
@@ -41,13 +96,15 @@ public class PizzaResource {
 
 Implement an authenticator to authenticate requests: 
 
+Here's an example implementation:
+
 ```java
-public class MyAuthenticator extends AbstractCachingAuthenticator<Principal> {
-    // some code is intentionally missing 
+public class MyAuthenticator extends AbstractAuthenticator<Principal> {
+    // some code is intentially missing 
     
     @Override
-    protected Principal loadPrincipal(Credentials credentials) {
-        // return the principal identified by the credentials from the API request
+    protected Principal getPrincipal(Credentials credentials) {
+        // Return the principal identified by the credentials from the API request
     } 
 
     @Override
@@ -60,7 +117,7 @@ public class MyAuthenticator extends AbstractCachingAuthenticator<Principal> {
 Register the authenticator with Jersey. For example, using Dropwizard:
 
 ```java
-environment.addProvider(new HmacAuthProvider(new DefaultRequestHandler(new MyAuthenticator())));
+environment.addProvider(new HmacAuthProvider<HmacAuth, Principal>(new DefaultRequestHandler(new MyAuthenticator())));
 ```
 
 ### Client Side
