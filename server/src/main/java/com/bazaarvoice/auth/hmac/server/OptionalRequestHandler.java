@@ -12,37 +12,37 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 
 /**
- * A relaxed implementation of a <code>RequestHandler</code>, which does not require a request
+ * AnnotationType relaxed implementation of a <code>RequestHandler</code>, which does not require a request
  * to contain authentication credentials, but still validates credentials if provided.
  *
- * @param <A> the type of annotation to look for (consider using {@link HmacAuth})
- * @param <P> the type of principal the handler returns
+ * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <PrincipalType> the type of principal the handler returns
  */
-public class OptionalRequestHandler<A extends Annotation, P> implements RequestHandler<A, P> {
+public class OptionalRequestHandler<AnnotationType extends Annotation, PrincipalType> implements RequestHandler<AnnotationType, PrincipalType> {
     private static final Logger LOG = LoggerFactory.getLogger(OptionalRequestHandler.class);
 
     private final RequestDecoder requestDecoder;
-    private final Authenticator<P> authenticator;
+    private final Authenticator<PrincipalType> authenticator;
 
-    public OptionalRequestHandler(Authenticator<Principal> authenticator) {
+    public OptionalRequestHandler(Authenticator<PrincipalType> authenticator) {
         this(new RequestDecoder(new RequestConfiguration()), authenticator);
     }
 
-    public OptionalRequestHandler(Authenticator<Principal> authenticator, RequestConfiguration requestConfiguration) {
+    public OptionalRequestHandler(Authenticator<PrincipalType> authenticator, RequestConfiguration requestConfiguration) {
         this(new RequestDecoder(requestConfiguration), authenticator);
     }
 
     @VisibleForTesting
-    OptionalRequestHandler(RequestDecoder requestDecoder, Authenticator<P> authenticator) {
+    OptionalRequestHandler(RequestDecoder requestDecoder, Authenticator<PrincipalType> authenticator) {
         this.requestDecoder = requestDecoder;
         this.authenticator = authenticator;
     }
 
     @Override
-    public P handle(A annotation, HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
+    public PrincipalType handle(AnnotationType annotation, HttpRequestContext request) throws NotAuthorizedException, InternalServerException {
         try {
             Credentials credentials = requestDecoder.decode(request);
-            P result = authenticator.authenticate(credentials);
+            PrincipalType result = authenticator.authenticate(credentials);
             if (result != null) {
                 return result;
             }
