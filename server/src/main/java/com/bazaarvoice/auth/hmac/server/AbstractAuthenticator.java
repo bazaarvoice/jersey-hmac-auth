@@ -18,9 +18,9 @@ import static com.bazaarvoice.auth.hmac.common.TimeUtils.nowInUTC;
  * request credentials and returns the principal that the credentials identify. This class provides common
  * validation features, such as ensuring that the request has a valid timestamp and signature.
  *
- * @param <Principal> the type of principal the authenticator returns
+ * @param <P> the type of principal the authenticator returns
  */
-public abstract class AbstractAuthenticator<Principal> implements Authenticator<Principal> {
+public abstract class AbstractAuthenticator<P> implements Authenticator<P> {
     private static final Logger LOG = LoggerFactory.getLogger(HmacAuthProvider.class);
 
     private final long allowedTimestampRange;           // in milliseconds
@@ -48,7 +48,7 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
     }
 
     @Override
-    public Principal authenticate(Credentials credentials) {
+    public P authenticate(Credentials credentials) {
         // Make sure the timestamp has not expired - this is to protect against replay attacks
         if (!validateTimestamp(credentials.getTimestamp())) {
             LOG.info("Invalid timestamp");
@@ -56,7 +56,7 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
         }
 
         // Get the principal identified by the credentials
-        Principal principal = getPrincipal(credentials);
+        P principal = getPrincipal(credentials);
         if (principal == null) {
             LOG.info("Could not get principal");
             return null;
@@ -78,7 +78,7 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
      * @param credentials the credentials specified on the request
      * @return the principal object
      */
-    protected abstract Principal getPrincipal(Credentials credentials);
+    protected abstract P getPrincipal(Credentials credentials);
 
     /**
      * Retrieve the secret key for the given principal.
@@ -86,7 +86,7 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
      * @param principal the principal for which to retrieve the secret key
      * @return the secret key
      */
-    protected abstract String getSecretKeyFromPrincipal(Principal principal);
+    protected abstract String getSecretKeyFromPrincipal(P principal);
 
     /**
      * To protect against replay attacks, make sure the timestamp on the request is valid
