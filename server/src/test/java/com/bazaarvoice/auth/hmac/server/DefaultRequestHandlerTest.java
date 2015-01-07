@@ -11,6 +11,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +36,9 @@ public class DefaultRequestHandlerTest {
     public void setUp() {
         decoder = mock(RequestDecoder.class);
         authenticator = mock(Authenticator.class);
+
         authorizer = mock(Authorizer.class);
+        when(authorizer.authorize(any(HmacAuth.class), anyString())).thenReturn(true);
         handler = new DefaultRequestHandler<String>(decoder, authenticator, authorizer);
     }
 
@@ -51,6 +54,18 @@ public class DefaultRequestHandlerTest {
         HttpRequestContext request = mock(HttpRequestContext.class);
         when(decoder.decode(any(HttpRequestContext.class))).thenReturn(credentials);
         when(authenticator.authenticate(any(Credentials.class))).thenReturn(principal);
+
+        String value = handler.handle(annotation, request);
+        assertNotNull(value);
+        assertEquals(principal, value);
+    }
+
+    @Test(expected = NotAuthorizedException.class)
+    public void testHandleWithValidCredentialsButUnauthorized() {
+        HttpRequestContext request = mock(HttpRequestContext.class);
+        when(decoder.decode(any(HttpRequestContext.class))).thenReturn(credentials);
+        when(authenticator.authenticate(any(Credentials.class))).thenReturn(principal);
+        when(authorizer.authorize(any(HmacAuth.class), anyString())).thenReturn(false);
 
         String value = handler.handle(annotation, request);
         assertNotNull(value);

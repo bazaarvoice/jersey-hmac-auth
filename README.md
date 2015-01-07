@@ -68,7 +68,7 @@ public class MyAuthenticator extends AbstractAuthenticator<Principal> {
 Register the authenticator with Jersey. For example, using Dropwizard:
 
 ```java
-environment.addProvider(new HmacAuthProvider<HmacAuth, Principal>(new DefaultRequestHandler(new MyAuthenticator())) {});
+environment.addProvider(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<HmacAuth, String>(new PizzaAuthenticator())) {});
 ```
 
 ### Client Side

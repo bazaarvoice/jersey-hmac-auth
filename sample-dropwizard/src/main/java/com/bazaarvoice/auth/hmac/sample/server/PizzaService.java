@@ -23,6 +23,6 @@ public class PizzaService extends Service<Configuration> {
     public void run(Configuration configuration, Environment environment) throws Exception {
         environment.addResource(new PizzaResource());
         environment.addHealthCheck(new PizzaHealthCheck());
-        environment.addProvider(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<>(new PizzaAuthenticator())) {});
+        environment.addProvider(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<HmacAuth, String>(new PizzaAuthenticator())) {});
     }
 }
