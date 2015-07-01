@@ -73,7 +73,7 @@ public abstract class ValidatingHttpServer implements Container {
     }
 
     public URI getUri() {
-        return UriBuilder.fromUri("http://localhost").port(port).build();
+        return UriBuilder.fromUri("http://localhost/").port(port).build();
     }
 
     private static class Decoder {
