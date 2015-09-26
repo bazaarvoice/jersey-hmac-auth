@@ -13,7 +13,75 @@ You can use this library to add support for HMAC authentication on the client an
 
 ## Getting Started
 
-### Server Side
+### Server Side (Jersey 2.x / `org.glassfish.jersey` packages)
+
+If your application uses Jersey 2.x, add this Maven dependency:
+```xml
+<dependency>
+    <groupId>com.bazaarvoice.auth</groupId>
+    <artifactId>jersey-hmac-auth-server2</artifactId>
+    <version>${version}</version>
+</dependency>
+```
+
+Modify your Jersey resource methods to include a principal annotated with `@HmacAuth`. For example:
+
+```java
+@Path("/pizza")
+@Produces(MediaType.TEXT_PLAIN)
+public class PizzaResource {
+    @GET
+    public String get(@HmacAuth Principal principal) {
+        // This gets control only if the request is authenticated. 
+        // The principal identifies the API caller (and can be of any type you want).
+    }
+}
+```
+
+Implement an authenticator to authenticate requests: 
+
+```java
+public class MyAuthenticator extends AbstractCachingAuthenticator<Principal> {
+    // some code is intentionally missing 
+    
+    @Override
+    protected Principal loadPrincipal(Credentials credentials) {
+        // return the principal identified by the credentials from the API request
+    } 
+
+    @Override
+    protected String getSecretKeyFromPrincipal(Principal principal) {
+        // return the secret key for the given principal
+    }
+}
+```
+
+Register the authenticator with Jersey.
+
+```java
+public class PizzaApplication<P> extends ResourceConfig {
+    public PizzaApplication() {
+        // register the Feature that will tell Jersey to process the @HmacAuth annotations
+        // specify your principal type here
+        register(new HmacAuthFeature<String>());
+
+        // tell Jersey about your custom Authenticator
+        register(new AbstractBinder() {
+            protected void configure() {
+                // The P parameter is to trick HK2 into injecting the Authenticator where it is needed.
+                bind(PizzaAuthenticator.class).to(new TypeLiteral<Authenticator<P>>() {});
+            }
+        });
+
+        // register your resources
+        register(PizzaResource2.class);
+    }
+}
+```
+
+See the [jersey-hmac-auth-sample2](sample-jersey2) project for a complete working example.
+
+### Server Side (Jersey 1.x / `com.sun.jersey` packages)
 
 Add this maven dependency:
 
@@ -63,7 +131,7 @@ Register the authenticator with Jersey. For example, using Dropwizard:
 environment.addProvider(new HmacAuthProvider(new DefaultRequestHandler(new MyAuthenticator())));
 ```
 
-### Client Side
+### Client Side (Jersey 1.x only)
 
 On the client side, e.g. in an SDK library that interfaces with the API, the client must build requests following the
 authentication contract that jersey-hmac-auth implements. You can do this in any language. However, the jersey-hmac-auth
@@ -105,3 +173,7 @@ $ mvn clean install
 To submit a new request or issue, please visit the [Issues](https://github.com/bazaarvoice/jersey-hmac-auth/issues) page.
 
 Pull requests are always welcome.
+
+## Continuous Integration
+
+[![Build Status](https://travis-ci.org/bazaarvoice/jersey-hmac-auth.png?branch=master)](https://travis-ci.org/bazaarvoice/jersey-hmac-auth)

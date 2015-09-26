@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -6,7 +6,7 @@
         <groupId>com.bazaarvoice.commons</groupId>
         <artifactId>bv-opensource-super-pom</artifactId>
         <version>1.2</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <groupId>com.bazaarvoice.auth</groupId>
@@ -22,7 +22,10 @@
     </scm>
 
     <properties>
-        <jersey.version>1.17.1</jersey.version>
+        <!-- Support for both Jersey 1.x and 2.x are available, see README.md for more information -->
+        <jersey1.version>1.17.1</jersey1.version>
+        <!-- use latest Jersey 2.x version compatible with JDK 6 -->
+        <jersey2.version>2.6</jersey2.version>
         <slf4j.version>1.7.5</slf4j.version>
         <java.minimum.version>1.6</java.minimum.version>
     </properties>
@@ -69,13 +72,13 @@
             <dependency>
                 <groupId>com.sun.jersey</groupId>
                 <artifactId>jersey-client</artifactId>
-                <version>${jersey.version}</version>
+                <version>${jersey1.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.sun.jersey</groupId>
                 <artifactId>jersey-server</artifactId>
-                <version>${jersey.version}</version>
+                <version>${jersey1.version}</version>
             </dependency>
 
             <dependency>
@@ -121,21 +124,21 @@
             <dependency>
                 <groupId>com.sun.jersey.jersey-test-framework</groupId>
                 <artifactId>jersey-test-framework-core</artifactId>
-                <version>${jersey.version}</version>
+                <version>${jersey1.version}</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>com.sun.jersey.jersey-test-framework</groupId>
                 <artifactId>jersey-test-framework-inmemory</artifactId>
-                <version>${jersey.version}</version>
+                <version>${jersey1.version}</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>com.sun.jersey</groupId>
                 <artifactId>jersey-json</artifactId>
-                <version>${jersey.version}</version>
+                <version>${jersey1.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -144,6 +147,14 @@
                 <artifactId>simple</artifactId>
                 <version>5.1.6</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+            	<!-- Use jersey-container-servlet-core to support Servlet API older than 3.0 (as opposed to
+            	     jersey-container-servlet)
+            	     https://jersey.java.net/documentation/latest/modules-and-dependencies.html#servlet-app-general -->
+            	<groupId>org.glassfish.jersey.containers</groupId>
+            	<artifactId>jersey-container-servlet-core</artifactId>
+            	<version>${jersey2.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -154,5 +165,7 @@
         <module>server</module>
         <module>cli</module>
         <module>sample-dropwizard</module>
-    </modules>
+        <module>server2</module>
+        <module>sample-jersey2</module>
+  </modules>
 </project>
