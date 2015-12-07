@@ -154,5 +154,6 @@
         <module>server</module>
         <module>cli</module>
         <module>sample-dropwizard</module>
+        <module>sample-authorization</module>
     </modules>
 </project>

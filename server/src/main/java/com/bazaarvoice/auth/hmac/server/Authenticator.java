@@ -6,9 +6,9 @@ import com.bazaarvoice.auth.hmac.common.Credentials;
  * An interface for classes which authenticate user-supplied credentials and return principal
  * objects
  *
- * @param <Principal> the type of principal the authenticator returns
+ * @param <PrincipalType> the type of principal the authenticator returns
  */
-public interface Authenticator<Principal> {
+public interface Authenticator<PrincipalType> {
     /**
      * Given a set of user-supplied credentials, return an principal.
      * <p/>
@@ -22,5 +22,5 @@ public interface Authenticator<Principal> {
      * @param credentials a set of user-supplied credentials
      * @return either an authenticated principal or null
      */
-    Principal authenticate(Credentials credentials);
+    PrincipalType authenticate(Credentials credentials);
 }

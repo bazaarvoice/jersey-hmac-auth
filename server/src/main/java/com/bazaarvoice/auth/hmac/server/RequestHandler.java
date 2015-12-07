@@ -4,12 +4,15 @@ import com.bazaarvoice.auth.hmac.server.exception.InternalServerException;
 import com.bazaarvoice.auth.hmac.server.exception.NotAuthorizedException;
 import com.sun.jersey.api.core.HttpRequestContext;
 
+import java.lang.annotation.Annotation;
+
 /**
  * An interface for classes which handle server requests with regards to authentication
  *
- * @param <Principal> the type of principal the handler returns
+ * @param <AnnotationType> the type of annotation to look for (consider using {@link HmacAuth})
+ * @param <PrincipalType> the type of principal the handler returns
  */
-public interface RequestHandler<Principal> {
+public interface RequestHandler<AnnotationType extends Annotation, PrincipalType> {
     /**
      * Given a request, return a principal.
      * <p/>
@@ -26,5 +29,5 @@ public interface RequestHandler<Principal> {
      * @param request the request context associated with a server request
      * @return either an authenticated principal or null
      */
-    Principal handle(HttpRequestContext request) throws NotAuthorizedException, InternalServerException;
+    PrincipalType handle(AnnotationType annotation, HttpRequestContext request) throws NotAuthorizedException, InternalServerException;
 }

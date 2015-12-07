@@ -69,7 +69,7 @@ public class HmacAuthProviderTest extends JerseyTest {
         };
 
         ResourceConfig config = new ScanningResourceConfig();
-        config.getSingletons().add(new HmacAuthProvider<String>(new DefaultRequestHandler<String>(authenticator, requestConfiguration)));
+        config.getSingletons().add(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<HmacAuth, String>(authenticator, requestConfiguration)) {});
         config.getSingletons().add(new AuthResource());
         return new LowLevelAppDescriptor.Builder(config).build();
     }

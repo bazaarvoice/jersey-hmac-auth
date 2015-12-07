@@ -1,6 +1,7 @@
 package com.bazaarvoice.auth.hmac.sample.server;
 
 import com.bazaarvoice.auth.hmac.server.DefaultRequestHandler;
+import com.bazaarvoice.auth.hmac.server.HmacAuth;
 import com.bazaarvoice.auth.hmac.server.HmacAuthProvider;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Bootstrap;
@@ -22,6 +23,6 @@ public class PizzaService extends Service<Configuration> {
     public void run(Configuration configuration, Environment environment) throws Exception {
         environment.addResource(new PizzaResource());
         environment.addHealthCheck(new PizzaHealthCheck());
-        environment.addProvider(new HmacAuthProvider<>(new DefaultRequestHandler<>(new PizzaAuthenticator())));
+        environment.addProvider(new HmacAuthProvider<HmacAuth, String>(new DefaultRequestHandler<HmacAuth, String>(new PizzaAuthenticator())) {});
     }
 }
