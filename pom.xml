@@ -6,19 +6,19 @@
         <groupId>com.bazaarvoice.commons</groupId>
         <artifactId>bv-opensource-super-pom</artifactId>
         <version>1.2</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.bazaarvoice.auth</groupId>
     <artifactId>jersey-hmac-auth</artifactId>
-    <version>0.16-SNAPSHOT</version>
+    <version>0.16</version>
     <packaging>pom</packaging>
 
     <scm>
         <url>https://github.com/bazaarvoice/jersey-hmac-auth</url>
         <connection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</connection>
         <developerConnection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>jersey-hmac-auth-0.16</tag>
     </scm>
 
     <properties>
