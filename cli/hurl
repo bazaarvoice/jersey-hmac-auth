@@ -52,11 +52,11 @@ while [[ $# > 0 ]]; do
         java -jar "${TOOLS_JAR}" -h
         exit 0
         ;;
-        -a|--api-key)
+        -a|--api-key|--apiKey)
         HURL_APIKEY="$1"
         shift
         ;;
-        -s|--secret-key)
+        -s|--secret-key|--secretKey)
         HURL_SECRET="$1"
         shift
         ;;
