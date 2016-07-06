@@ -70,14 +70,11 @@ public class RequestDecoder {
         InputStream in = containerRequest.getEntityInputStream();
 
         try {
-            byte[] content = null;
-            if (in.available() > 0) {
-                ReaderWriter.writeTo(in, out);
-                content = out.toByteArray();
+            ReaderWriter.writeTo(in, out);
+            byte[] content = out.toByteArray();
 
-                // Reset the input stream so that it can be read again by another filter or resource
-                containerRequest.setEntityInputStream(new ByteArrayInputStream(content));
-            }
+            // Reset the input stream so that it can be read again by another filter or resource
+            containerRequest.setEntityInputStream(new ByteArrayInputStream(content));
             return content;
 
         } catch (IOException ex) {
