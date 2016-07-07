@@ -11,14 +11,14 @@
 
     <groupId>com.bazaarvoice.auth</groupId>
     <artifactId>jersey-hmac-auth</artifactId>
-    <version>0.17-SNAPSHOT</version>
+    <version>0.17</version>
     <packaging>pom</packaging>
 
     <scm>
         <url>https://github.com/bazaarvoice/jersey-hmac-auth</url>
         <connection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</connection>
         <developerConnection>scm:git:git@github.com:bazaarvoice/jersey-hmac-auth.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>jersey-hmac-auth-0.17</tag>
     </scm>
 
     <properties>
