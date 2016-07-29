@@ -123,7 +123,7 @@ while [[ $# > 0 ]]; do
             append_args "$key"
         ;;
         -X*) # -XPOST
-            METHOD=$(echo $key |cut -f3-)
+            METHOD=$(echo $key |cut -c3-)
             append_args "$key"
         ;;
         -X|--request)
