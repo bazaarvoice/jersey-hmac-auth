@@ -98,7 +98,7 @@ while [[ $# > 0 ]]; do
             DATA="$1"
             shift
         ;;
-        -d|--data|--data-binary)
+        --data-binary)
             DEFAULT_METHOD=POST
             DATA="$1"
             DATA_TYPE_SUFFIX="-binary"
@@ -199,22 +199,28 @@ fi
 function signed_data() {
     echo $METHOD
     echo $TIMESTAMP
-    echo -n /; echo $URL |cut -d/ -f4-
+    local URL_PATH=/$(echo $URL |cut -d/ -f4-)
     if [[ -n "$DATA_FILE" ]]; then
+        echo $URL_PATH
         if [[ "$DATA_TYPE_SUFFIX" = "-binary" ]]; then
             cat $DATA_FILE
         else
             cat $DATA_FILE |perl -npe 's/[\r\n]//g' # strip CR/LF characters
         fi
     elif [[ -n "$DATA" ]]; then
+        echo $URL_PATH
         # important! omit trailing newline
         echo -n $DATA
+    else
+        # important! omit trailing newline
+        echo -n $URL_PATH
     fi
 }
 
 # YYYY-MM-DDThh:mm:ss.SSSZ
 TIMESTAMP=$(TZ=UTC date --iso-8601=ns |perl -npe 's/,(\d{3})\d*\+0000/.\1Z/')
-SIGNATURE=$(signed_data |openssl dgst -sha256 -hmac "${HURL_SECRET}" -binary |base64 |tr [+/] [-_])
+# signed_data |od -c
+SIGNATURE=$(signed_data |openssl dgst -sha256 -hmac "${HURL_SECRET}" -binary |base64 |perl -npe 's|\+|-|g; s|/|_|g;')
 VERSION="1"
 
 append_args -H "${HURL_TIMESTAMP_HEADER}: ${TIMESTAMP}"
