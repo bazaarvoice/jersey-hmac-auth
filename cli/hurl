@@ -169,7 +169,7 @@ if [[ -z "$METHOD" ]]; then
 fi
 
 # Append API key to the URL path (to include in signing)
-if [[ "$URL" == "*[?]*" ]]; then
+if [[ "$URL" == *[?]* ]]; then
     URL="${URL}&${HURL_APIKEY_PARAM}=${HURL_APIKEY}"
 else
     URL="${URL}?${HURL_APIKEY_PARAM}=${HURL_APIKEY}"
