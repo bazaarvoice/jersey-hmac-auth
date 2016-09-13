@@ -1,4 +1,7 @@
 #!/bin/bash
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
 
 usage()
 {
@@ -21,59 +24,128 @@ OPTIONS:
 EOF
 }
 
-# Figure out where this script lives (follow symbolic links).  Emulate GNU readlink -f.
-function readlink_for_osx() {
-    FILENAME="$1"
-    while true; do
-        cd "$( dirname "$FILENAME" )"
-        FILENAME="$( basename "$FILENAME" )"
-        [ -L "$FILENAME" ] || break
-        FILENAME="$( readlink "$FILENAME" )"
-    done
-    echo "$(pwd -P)/$FILENAME"
-}
-TOOLS_DIR="$( dirname "$( readlink_for_osx "${BASH_SOURCE:-$0}" )" )"
-TOOLS_JAR="$( echo ${TOOLS_DIR}/target/jersey-hmac-auth-cli-*.jar )"
-
 HURL_PROFILE="default"
+HURL_APIKEY="${HURL_APIKEY:-}"
+HURL_SECRET="${HURL_SECRET:-}"
+HURL_SIGNATURE_HEADER="X-Auth-Signature"
+HURL_TIMESTAMP_HEADER="X-Auth-Timestamp"
+HURL_VERSION_HEADER="X-Auth-Version"
+HURL_APIKEY_PARAM="apiKey"
+CONFIGURE=""
+DEFAULT_METHOD="GET"
+METHOD=""
+URL=""
+DATA=""
+DATA_FILE=""
+DATA_TYPE_SUFFIX=""
 ARGS=""
 VERBOSE=""
+
+function append_args() {
+    while [[ $# > 0 ]]; do
+        ARGS+=$'\t'"$1"
+        shift
+    done
+}
 
 while [[ $# > 0 ]]; do
     key="$1"
     shift
     case $key in
         -p|--profile)
-        HURL_PROFILE="$1"
-        shift
+            HURL_PROFILE="$1"
+            shift
         ;;
         -h|--help)
-        usage
-        java -jar "${TOOLS_JAR}" -h
-        exit 0
+            usage
+            exit 0
         ;;
         -a|--api-key|--apiKey)
-        HURL_APIKEY="$1"
-        shift
+            HURL_APIKEY="$1"
+            shift
         ;;
         -s|--secret-key|--secretKey)
-        HURL_SECRET="$1"
-        shift
+            HURL_SECRET="$1"
+            shift
+        ;;
+        --headerSignature)
+            HURL_SIGNATURE_HEADER="$1"
+            shift
+        ;;
+        --headerTimestamp)
+            HURL_TIMESTAMP_HEADER="$1"
+            shift
+        ;;
+        --headerVersion)
+            HURL_VERSION_HEADER="$1"
+            shift
+        ;;
+        --apiKeyParamName)
+            HURL_APIKEY_PARAM="$1"
+            shift
         ;;
         -c|--configure)
-        CONFIGURE="true"
+            CONFIGURE="true"
+        ;;
+        -C)
+            append_args -H 'Content-Type: $1'
+        ;;
+        -J)
+            append_args -H 'Content-Type: application/json'
+        ;;
+        -d|--data|--data-ascii)
+            DEFAULT_METHOD=POST
+            DATA="$1"
+            shift
+        ;;
+        --data-binary)
+            DEFAULT_METHOD=POST
+            DATA="$1"
+            DATA_TYPE_SUFFIX="-binary"
+            shift
+        ;;
+        --data*|-F|--form)
+            echo "hurl: $key is unsupported!"
+            exit 2
+        ;;
+        -T|--upload-file)
+            DEFAULT_METHOD=PUT
+            DATA="@$1"
+            DATA_TYPE_SUFFIX="-binary"
+            shift
+        ;;
+        -G|--get)
+            METHOD=GET
+            append_args "$key"
+        ;;
+        -I|--head)
+            METHOD=HEAD
+            append_args "$key"
+        ;;
+        -X*) # -XPOST
+            METHOD=$(echo $key |cut -c3-)
+            append_args "$key"
+        ;;
+        -X|--request)
+            METHOD="$1"
+            append_args "$key" "$1"
+            shift
         ;;
         -v|--verbose)
-        VERBOSE="true"
-        ARGS="$ARGS $key"
+            VERBOSE="true"
+            append_args "$key"
+        ;;
+        http://*|https://*)
+            URL=$key
         ;;
         *)
-        ARGS="$ARGS $key"
+            echo $key
+            append_args "$key"
         ;;
     esac
 done
 
-if [ ! -f ~/.hurl/$HURL_PROFILE.conf ]; then
+if [[ ! -f ~/.hurl/$HURL_PROFILE.conf ]]; then
     [[ ! -z "$VERBOSE" ]] && echo "~/.hurl/$HURL_PROFILE.conf not found, using env variables"
 else
     [[ -z "$HURL_APIKEY" ]] && HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
@@ -85,18 +157,80 @@ if [[ -z "$HURL_APIKEY" || -z "$HURL_SECRET" || ! -z $CONFIGURE ]]; then
     echo -n "Enter Hurl Secret [****${HURL_SECRET:(-4)}]: " && read HURL_SECRET
 fi
 
-ARGS=$(echo ${ARGS} | sed -e 's/^ *//g;s/ *$//g')
-
-if [ -z "$ARGS" ]; then
-    echo "Missing url argument to connect to..."
-    exit -1
+if [[ -z "$URL" ]]; then
+    echo "hurl: no URL specified!"
+    exit 2
 fi
+
+# Use the inferred HTTP verb, if none was explicit
+if [[ -z "$METHOD" ]]; then
+    METHOD=$DEFAULT_METHOD
+    append_args -X${METHOD}
+fi
+
+# Append API key to the URL path (to include in signing)
+if [[ "$URL" == *[?]* ]]; then
+    URL="${URL}&${HURL_APIKEY_PARAM}=${HURL_APIKEY}"
+else
+    URL="${URL}?${HURL_APIKEY_PARAM}=${HURL_APIKEY}"
+fi
+append_args $URL
+
+if [[ -n "$DATA" ]]; then
+    case "$DATA" in
+        @-)
+            if [[ "$DATA_TYPE_SUFFIX" = "-binary" ]]; then
+                echo "hurl: -T - / --data-binary @- is unsupported!"
+                exit 2
+            fi
+            DATA=$(cat - |perl -npe 's/[\r\n]//g') # strip CR/LF characters
+            append_args --data "$DATA"
+        ;;
+        @*)
+            DATA_FILE=$(echo "$DATA" |cut -c2-)
+            append_args "--data${DATA_TYPE_SUFFIX}" "$DATA"
+        ;;
+        *)
+            append_args "--data${DATA_TYPE_SUFFIX}" "$DATA"
+        ;;
+    esac
+fi
+
+function signed_data() {
+    echo $METHOD
+    echo $TIMESTAMP
+    local URL_PATH=/$(echo $URL |cut -d/ -f4-)
+    if [[ -n "$DATA_FILE" ]]; then
+        echo $URL_PATH
+        if [[ "$DATA_TYPE_SUFFIX" = "-binary" ]]; then
+            cat $DATA_FILE
+        else
+            cat $DATA_FILE |perl -npe 's/[\r\n]//g' # strip CR/LF characters
+        fi
+    elif [[ -n "$DATA" ]]; then
+        echo $URL_PATH
+        # important! omit trailing newline
+        echo -n $DATA
+    else
+        # important! omit trailing newline
+        echo -n $URL_PATH
+    fi
+}
+
+# YYYY-MM-DDThh:mm:ss.SSSZ
+TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+# signed_data |od -c
+SIGNATURE=$(signed_data |openssl dgst -sha256 -hmac "${HURL_SECRET}" -binary |base64 |perl -npe 's|\+|-|g; s|/|_|g;')
+VERSION="1"
+
+append_args -H "${HURL_TIMESTAMP_HEADER}: ${TIMESTAMP}"
+append_args -H "${HURL_SIGNATURE_HEADER}: ${SIGNATURE}"
+append_args -H "${HURL_VERSION_HEADER}: ${VERSION}"
 
 if [ ! -z "$VERBOSE" ]; then
     echo "Using ApiKey: ****${HURL_APIKEY:(-4)}"
     echo "Using Secret: ****${HURL_SECRET:(-4)}"
-    echo "Using Arguments: $ARGS"
-    echo "Executing: java -jar ${TOOLS_JAR} --apiKey ****${HURL_APIKEY:(-4)} --secretKey ****${HURL_SECRET:(-4)} $ARGS"
+    set -x # force Bash to echo the following command
 fi
 
-java -jar "${TOOLS_JAR}" --apiKey "$HURL_APIKEY" --secretKey "$HURL_SECRET" $ARGS
+curl $ARGS
