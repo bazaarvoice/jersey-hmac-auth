@@ -76,6 +76,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-client</artifactId>
+                <version>${jersey2.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.sun.jersey</groupId>
                 <artifactId>jersey-server</artifactId>
                 <version>${jersey1.version}</version>
@@ -162,10 +168,11 @@
     <modules>
         <module>common</module>
         <module>client</module>
+        <module>client2</module>
         <module>server</module>
         <module>cli</module>
         <module>sample-dropwizard</module>
         <module>server2</module>
         <module>sample-jersey2</module>
-  </modules>
+    </modules>
 </project>
