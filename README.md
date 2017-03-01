@@ -131,7 +131,25 @@ Register the authenticator with Jersey. For example, using Dropwizard:
 environment.addProvider(new HmacAuthProvider(new DefaultRequestHandler(new MyAuthenticator())));
 ```
 
-### Client Side (Jersey 1.x only)
+### Client Side (Jersey 2.x / `org.glassfish.jersey` packages)            
+
+If your application uses Jersey 2.x, add this Maven dependency:
+
+```xml
+<dependency>
+    <groupId>com.bazaarvoice.auth</groupId>
+    <artifactId>jersey-hmac-auth-client2</artifactId>
+    <version>${version}</version>
+</dependency>
+``` 
+
+Add this filter to your Jersey client (assuming you have already have a Jersey client instance):
+
+```java
+client.register(new HmacClientFilter(apiKey, secretKey));
+```
+
+### Client Side (Jersey 1.x / `com.sun.jersey` packages)
 
 On the client side, e.g. in an SDK library that interfaces with the API, the client must build requests following the
 authentication contract that jersey-hmac-auth implements. You can do this in any language. However, the jersey-hmac-auth
