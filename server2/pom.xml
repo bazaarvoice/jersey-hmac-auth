@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.bazaarvoice.auth</groupId>
     <artifactId>jersey-hmac-auth</artifactId>
-    <version>0.18</version>
+    <version>0.19-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>jersey-hmac-auth-server2</artifactId>
