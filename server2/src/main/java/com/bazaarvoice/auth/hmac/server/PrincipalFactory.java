@@ -67,8 +67,11 @@ public class PrincipalFactory<P> implements Factory<P> {
         builder.withApiKey(!apiKeys.isEmpty() ? apiKeys.get(0) : null);
         builder.withSignature(request.getHeaderString("X-Auth-Signature"));
         builder.withTimestamp(request.getHeaderString("X-Auth-Timestamp"));
-        builder.withVersion(
-                Version.fromValue(request.getHeaderString("X-Auth-Version")));
+        // use default x-auth-version if not provided
+        if(request.getHeaderString("X-Auth-Version") != null){
+            builder.withVersion(
+                    Version.fromValue(request.getHeaderString("X-Auth-Version")));
+        }
         builder.withMethod(request.getMethod());
         builder.withPath(requestUri.getPath() + "?" + requestUri.getQuery());
         if (request.hasEntity()) {
