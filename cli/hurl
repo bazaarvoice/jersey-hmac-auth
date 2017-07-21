@@ -27,10 +27,10 @@ EOF
 HURL_PROFILE="default"
 HURL_APIKEY="${HURL_APIKEY:-}"
 HURL_SECRET="${HURL_SECRET:-}"
-HURL_SIGNATURE_HEADER="X-Auth-Signature"
-HURL_TIMESTAMP_HEADER="X-Auth-Timestamp"
-HURL_VERSION_HEADER="X-Auth-Version"
-HURL_APIKEY_PARAM="apiKey"
+HURL_SIGNATURE_HEADER="${HURL_SIGNATURE_HEADER:-}"
+HURL_TIMESTAMP_HEADER="${HURL_TIMESTAMP_HEADER:-}"
+HURL_VERSION_HEADER="${HURL_VERSION_HEADER:-}"
+HURL_APIKEY_PARAM="${HURL_APIKEY_PARAM:-}"
 CONFIGURE=""
 DEFAULT_METHOD="GET"
 METHOD=""
@@ -139,7 +139,6 @@ while [[ $# > 0 ]]; do
             URL=$key
         ;;
         *)
-            echo $key
             append_args "$key"
         ;;
     esac
@@ -148,9 +147,18 @@ done
 if [[ ! -f ~/.hurl/$HURL_PROFILE.conf ]]; then
     [[ ! -z "$VERBOSE" ]] && echo "~/.hurl/$HURL_PROFILE.conf not found, using env variables"
 else
-    [[ -z "$HURL_APIKEY" ]] && HURL_APIKEY="$(grep apiKey ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
-    [[ -z "$HURL_SECRET" ]] && HURL_SECRET="$(grep secret ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+    [[ -z "$HURL_APIKEY" ]] && HURL_APIKEY="$(grep '^apiKey\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+    [[ -z "$HURL_SECRET" ]] && HURL_SECRET="$(grep -E '^secret(Key)?\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')"
+    [[ -z "$HURL_SIGNATURE_HEADER" ]] && HURL_SIGNATURE_HEADER="$(grep '^headerSignature\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
+    [[ -z "$HURL_TIMESTAMP_HEADER" ]] && HURL_TIMESTAMP_HEADER="$(grep '^headerTimestamp\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
+    [[ -z "$HURL_VERSION_HEADER" ]] && HURL_VERSION_HEADER="$(grep '^headerVersion\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
+    [[ -z "$HURL_APIKEY_PARAM" ]] && HURL_APIKEY_PARAM="$(grep '^apiKeyParamName\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
 fi
+
+[[ -z "$HURL_SIGNATURE_HEADER" ]] && HURL_SIGNATURE_HEADER="X-Auth-Signature"
+[[ -z "$HURL_TIMESTAMP_HEADER" ]] && HURL_TIMESTAMP_HEADER="X-Auth-Timestamp"
+[[ -z "$HURL_VERSION_HEADER" ]] && HURL_VERSION_HEADER="X-Auth-Version"
+[[ -z "$HURL_APIKEY_PARAM" ]] && HURL_APIKEY_PARAM="apiKey"
 
 if [[ -z "$HURL_APIKEY" || -z "$HURL_SECRET" || ! -z $CONFIGURE ]]; then
     echo -n "Enter Hurl ApiKey [****${HURL_APIKEY:(-4)}]: " && read HURL_APIKEY
@@ -228,8 +236,8 @@ append_args -H "${HURL_SIGNATURE_HEADER}: ${SIGNATURE}"
 append_args -H "${HURL_VERSION_HEADER}: ${VERSION}"
 
 if [ ! -z "$VERBOSE" ]; then
-    echo "Using ApiKey: ****${HURL_APIKEY:(-4)}"
-    echo "Using Secret: ****${HURL_SECRET:(-4)}"
+    echo "Using ApiKey: ****${HURL_APIKEY:(-4)}" 1>&2
+    echo "Using Secret: ****${HURL_SECRET:(-4)}" 1>&2
     set -x # force Bash to echo the following command
 fi
 
