@@ -3,20 +3,28 @@ package com.bazaarvoice.auth.hmac.server;
 import static com.bazaarvoice.auth.hmac.common.Credentials.builder;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.lang.Validate.notNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bazaarvoice.auth.hmac.common.Credentials.CredentialsBuilder;
 import com.bazaarvoice.auth.hmac.common.Version;
@@ -29,6 +37,7 @@ import com.bazaarvoice.auth.hmac.common.Version;
  */
 public class PrincipalFactory<P> implements Factory<P> {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Authenticator<? extends P> authenticator;
     private final Provider<? extends ContainerRequest> requestProvider;
 
@@ -66,6 +75,24 @@ public class PrincipalFactory<P> implements Factory<P> {
                 Version.fromValue(request.getHeaderString("X-Auth-Version")));
         builder.withMethod(request.getMethod());
         builder.withPath(requestUri.getPath() + "?" + requestUri.getQuery());
+        if (request.hasEntity()) {
+            try {
+                final InputStream inputStream = request.getEntityStream();
+                try {
+                    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    copy(inputStream, outputStream);
+
+                    final byte[] bytes = outputStream.toByteArray();
+                    builder.withContent(bytes);
+                    request.setEntityStream(new ByteArrayInputStream(bytes));
+                } finally {
+                    inputStream.close();
+                }
+            } catch (final IOException ioe) {
+                logger.error(ioe.getMessage(), ioe);
+                throw new InternalServerErrorException("Error reading content");
+            }
+        }
 
         final P retval = getAuthenticator().authenticate(builder.build());
         if (retval == null) {
