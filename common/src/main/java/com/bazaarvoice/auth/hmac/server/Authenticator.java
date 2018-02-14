@@ -23,4 +23,8 @@ public interface Authenticator<Principal> {
      * @return either an authenticated principal or null
      */
     Principal authenticate(Credentials credentials);
+
+    default String getApiKeyName() {
+        return "apiKey";
+    }
 }

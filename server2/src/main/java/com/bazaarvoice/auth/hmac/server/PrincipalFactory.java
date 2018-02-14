@@ -62,9 +62,10 @@ public class PrincipalFactory<P> implements Factory<P> {
 
         final MultivaluedMap<? super String, ? extends String> queryParameters = uriInfo
                 .getQueryParameters();
-        final List<? extends String> apiKeys = queryParameters.get("apiKey");
+        String apiKeyName = getAuthenticator().getApiKeyName();
+        final List<? extends String> apiKeys = queryParameters.get(apiKeyName);
         if (apiKeys == null || apiKeys.isEmpty()) {
-            throw new BadRequestException("apiKey is required");
+            throw new BadRequestException("apiKey is required in param: " + apiKeyName);
         }
 
         final CredentialsBuilder builder = builder();
