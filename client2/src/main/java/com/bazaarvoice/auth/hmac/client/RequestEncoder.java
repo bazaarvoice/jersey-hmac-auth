@@ -87,13 +87,7 @@ public class RequestEncoder {
     private byte[] getSerializedEntity(ClientRequest request) {
         ClientRequest requestCopy = new ClientRequest(request);
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        requestCopy.setStreamProvider(new OutboundMessageContext.StreamProvider() {
-
-            @Override
-            public OutputStream getOutputStream(int i) {
-                return outputStream;
-            }
-        });
+        requestCopy.setStreamProvider(contentLength -> outputStream);
         try {
             requestCopy.writeEntity();
         } catch (IOException e) {
