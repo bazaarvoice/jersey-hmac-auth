@@ -56,6 +56,7 @@ public class PrincipalFactoryTest {
         initMocks(this);
 
         given(requestProvider.get()).willReturn(request);
+        given(authenticator.getApiKeyName()).willReturn(Authenticator.DEFAULT_API_KEY_PARAM);
         factory = new PrincipalFactory<String>(authenticator, requestProvider);
     }
 
@@ -159,7 +160,7 @@ public class PrincipalFactoryTest {
         // then
         assertEquals("principal", result);
         final ArgumentCaptor<Credentials> credentialsCaptor = ArgumentCaptor.forClass(Credentials.class);
-        verify(authenticator, only()).authenticate(credentialsCaptor.capture());
+        verify(authenticator).authenticate(credentialsCaptor.capture());
         final Credentials credentials = credentialsCaptor.getValue();
         assertEquals("validApiKey", credentials.getApiKey());
         assertEquals("two seconds ago", credentials.getTimestamp());

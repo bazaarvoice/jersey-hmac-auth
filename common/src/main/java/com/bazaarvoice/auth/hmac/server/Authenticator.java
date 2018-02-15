@@ -9,6 +9,17 @@ import com.bazaarvoice.auth.hmac.common.Credentials;
  * @param <Principal> the type of principal the authenticator returns
  */
 public interface Authenticator<Principal> {
+
+    String DEFAULT_API_KEY_PARAM = "apiKey";
+
+    /**
+     * Configuration point that helps customize query parameter name which is used to
+     * lookup query for credentials.
+     *
+     * @return parameter name
+     */
+    String getApiKeyName();
+
     /**
      * Given a set of user-supplied credentials, return an principal.
      * <p/>
@@ -23,8 +34,4 @@ public interface Authenticator<Principal> {
      * @return either an authenticated principal or null
      */
     Principal authenticate(Credentials credentials);
-
-    default String getApiKeyName() {
-        return "apiKey";
-    }
 }

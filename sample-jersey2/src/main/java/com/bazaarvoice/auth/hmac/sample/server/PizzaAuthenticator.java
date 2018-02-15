@@ -15,4 +15,8 @@ public class PizzaAuthenticator implements Authenticator<String> {
         return null;
     }
 
+    @Override
+    public String getApiKeyName() {
+        return DEFAULT_API_KEY_PARAM;
+    }
 }

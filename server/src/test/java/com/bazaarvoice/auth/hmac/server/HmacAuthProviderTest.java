@@ -57,6 +57,11 @@ public class HmacAuthProviderTest extends JerseyTest {
                 .build();
         final Authenticator<String> authenticator = new Authenticator<String>() {
             @Override
+            public String getApiKeyName() {
+                return DEFAULT_API_KEY_PARAM;
+            }
+
+            @Override
             public String authenticate(Credentials credentials) {
                 if (GOOD_API_KEY.equals(credentials.getApiKey())) {
                     return GOOD_API_KEY;
