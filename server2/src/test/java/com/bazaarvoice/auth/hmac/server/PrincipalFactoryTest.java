@@ -2,12 +2,10 @@ package com.bazaarvoice.auth.hmac.server;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static org.apache.commons.io.IOUtils.copy;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -27,6 +25,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.SecurityContext;
 
+import com.google.common.io.ByteStreams;
 import org.glassfish.jersey.internal.PropertiesDelegate;
 import org.glassfish.jersey.internal.util.collection.ImmutableMultivaluedMap;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -208,7 +207,7 @@ public class PrincipalFactoryTest {
         final InputStream entityStream = request.getEntityStream();
         try {
             final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            copy(entityStream, outputStream);
+            ByteStreams.copy(entityStream, outputStream);
 
             assertEquals(content, new String(outputStream.toByteArray(), "UTF-8"));
         } finally {

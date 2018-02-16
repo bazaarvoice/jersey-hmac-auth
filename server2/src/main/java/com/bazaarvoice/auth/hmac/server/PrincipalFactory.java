@@ -1,11 +1,5 @@
 package com.bazaarvoice.auth.hmac.server;
 
-import static com.bazaarvoice.auth.hmac.common.Credentials.builder;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.Validate.notNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,8 +13,12 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
+import com.google.common.io.ByteStreams;
+import org.apache.commons.lang.Validate;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.slf4j.Logger;
@@ -50,7 +48,7 @@ public class PrincipalFactory<P> implements Factory<P> {
             final Provider<ContainerRequest> requestProvider) {
         // we could technically declare the dependency as Authenticator<? extends P>, but that complicates HK2
         // dependency-injection
-        notNull(authenticator, "authenticator cannot be null");
+        Validate.notNull(authenticator, "authenticator cannot be null");
         this.authenticator = authenticator;
         this.requestProvider = requestProvider;
     }
@@ -68,7 +66,7 @@ public class PrincipalFactory<P> implements Factory<P> {
             throw new BadRequestException("apiKey is required in param: " + apiKeyName);
         }
 
-        final CredentialsBuilder builder = builder();
+        final CredentialsBuilder builder = Credentials.builder();
         builder.withApiKey(!apiKeys.isEmpty() ? apiKeys.get(0) : null);
         builder.withSignature(request.getHeaderString("X-Auth-Signature"));
         builder.withTimestamp(request.getHeaderString("X-Auth-Timestamp"));
@@ -81,7 +79,7 @@ public class PrincipalFactory<P> implements Factory<P> {
                 final InputStream inputStream = request.getEntityStream();
                 try {
                     final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    copy(inputStream, outputStream);
+                    ByteStreams.copy(inputStream, outputStream);
 
                     final byte[] bytes = outputStream.toByteArray();
                     builder.withContent(bytes);
@@ -97,7 +95,7 @@ public class PrincipalFactory<P> implements Factory<P> {
 
         final P retval = getAuthenticator().authenticate(builder.build());
         if (retval == null) {
-            throw new NotAuthorizedException(status(UNAUTHORIZED).build());
+            throw new NotAuthorizedException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
         return retval;
     }
