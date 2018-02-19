@@ -21,8 +21,6 @@ import com.google.common.io.ByteStreams;
 import org.apache.commons.lang.Validate;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.bazaarvoice.auth.hmac.common.Credentials.CredentialsBuilder;
 import com.bazaarvoice.auth.hmac.common.Version;
@@ -35,7 +33,6 @@ import com.bazaarvoice.auth.hmac.common.Version;
  */
 public class PrincipalFactory<P> implements Factory<P> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Authenticator<? extends P> authenticator;
     private final Provider<? extends ContainerRequest> requestProvider;
 
@@ -88,8 +85,7 @@ public class PrincipalFactory<P> implements Factory<P> {
                     inputStream.close();
                 }
             } catch (final IOException ioe) {
-                logger.error(ioe.getMessage(), ioe);
-                throw new InternalServerErrorException("Error reading content");
+                throw new InternalServerErrorException("Error reading content", ioe);
             }
         }
 

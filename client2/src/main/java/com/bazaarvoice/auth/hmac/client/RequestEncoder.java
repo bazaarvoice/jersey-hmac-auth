@@ -96,8 +96,8 @@ public class RequestEncoder {
         });
         try {
             requestCopy.writeEntity();
-        } catch (IOException e) {
-            throw new WebApplicationException("Error reading content during signature");
+        } catch (IOException ioe) {
+            throw new WebApplicationException("Error reading content during signature", ioe);
         }
         return outputStream.toByteArray();
     }
