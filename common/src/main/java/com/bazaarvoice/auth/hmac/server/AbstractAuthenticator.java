@@ -135,4 +135,9 @@ public abstract class AbstractAuthenticator<Principal> implements Authenticator<
                 credentials.getPath(),
                 credentials.getContent());
     }
+
+    @Override
+    public String getApiKeyName() {
+        return DEFAULT_API_KEY_PARAM;
+    }
 }

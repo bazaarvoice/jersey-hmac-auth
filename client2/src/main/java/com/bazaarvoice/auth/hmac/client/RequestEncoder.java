@@ -7,6 +7,7 @@ import com.bazaarvoice.auth.hmac.common.Version;
 import org.glassfish.jersey.client.ClientRequest;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class RequestEncoder {
     private String buildSignature(ClientRequest request, String timestamp) {
         String method = getMethod(request);
         String path = getPath(request);
-        byte[] content = getContent(request);
+        byte[] content = request.hasEntity() ? getContent(request) : null;
         return signatureGenerator.generate(secretKey, method, timestamp, path, content);
     }
 
@@ -84,13 +85,20 @@ public class RequestEncoder {
     }
 
     private byte[] getSerializedEntity(ClientRequest request) {
+        ClientRequest requestCopy = new ClientRequest(request);
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        request.setStreamProvider(new OutboundMessageContext.StreamProvider() {
+        requestCopy.setStreamProvider(new OutboundMessageContext.StreamProvider() {
+
             @Override
-            public OutputStream getOutputStream(int contentLength) throws IOException {
+            public OutputStream getOutputStream(int contentLength) {
                 return outputStream;
             }
         });
+        try {
+            requestCopy.writeEntity();
+        } catch (IOException ioe) {
+            throw new WebApplicationException("Error reading content during signature", ioe);
+        }
         return outputStream.toByteArray();
     }
 

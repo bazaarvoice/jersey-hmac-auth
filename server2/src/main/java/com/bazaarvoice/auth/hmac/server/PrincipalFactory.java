@@ -1,20 +1,24 @@
 package com.bazaarvoice.auth.hmac.server;
 
-import static com.bazaarvoice.auth.hmac.common.Credentials.builder;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.apache.commons.lang.Validate.notNull;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import com.bazaarvoice.auth.hmac.common.Credentials;
+import com.google.common.io.ByteStreams;
+import org.apache.commons.lang.Validate;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.ContainerRequest;
 
@@ -41,7 +45,7 @@ public class PrincipalFactory<P> implements Factory<P> {
             final Provider<ContainerRequest> requestProvider) {
         // we could technically declare the dependency as Authenticator<? extends P>, but that complicates HK2
         // dependency-injection
-        notNull(authenticator, "authenticator cannot be null");
+        Validate.notNull(authenticator, "authenticator cannot be null");
         this.authenticator = authenticator;
         this.requestProvider = requestProvider;
     }
@@ -53,12 +57,13 @@ public class PrincipalFactory<P> implements Factory<P> {
 
         final MultivaluedMap<? super String, ? extends String> queryParameters = uriInfo
                 .getQueryParameters();
-        final List<? extends String> apiKeys = queryParameters.get("apiKey");
+        String apiKeyName = getAuthenticator().getApiKeyName();
+        final List<? extends String> apiKeys = queryParameters.get(apiKeyName);
         if (apiKeys == null || apiKeys.isEmpty()) {
-            throw new BadRequestException("apiKey is required");
+            throw new BadRequestException("apiKey is required in param: " + apiKeyName);
         }
 
-        final CredentialsBuilder builder = builder();
+        final CredentialsBuilder builder = Credentials.builder();
         builder.withApiKey(!apiKeys.isEmpty() ? apiKeys.get(0) : null);
         builder.withSignature(request.getHeaderString("X-Auth-Signature"));
         builder.withTimestamp(request.getHeaderString("X-Auth-Timestamp"));
@@ -66,10 +71,27 @@ public class PrincipalFactory<P> implements Factory<P> {
                 Version.fromValue(request.getHeaderString("X-Auth-Version")));
         builder.withMethod(request.getMethod());
         builder.withPath(requestUri.getPath() + "?" + requestUri.getQuery());
+        if (request.hasEntity()) {
+            try {
+                final InputStream inputStream = request.getEntityStream();
+                try {
+                    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    ByteStreams.copy(inputStream, outputStream);
+
+                    final byte[] bytes = outputStream.toByteArray();
+                    builder.withContent(bytes);
+                    request.setEntityStream(new ByteArrayInputStream(bytes));
+                } finally {
+                    inputStream.close();
+                }
+            } catch (final IOException ioe) {
+                throw new InternalServerErrorException("Error reading content", ioe);
+            }
+        }
 
         final P retval = getAuthenticator().authenticate(builder.build());
         if (retval == null) {
-            throw new NotAuthorizedException(status(UNAUTHORIZED).build());
+            throw new NotAuthorizedException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
         return retval;
     }
