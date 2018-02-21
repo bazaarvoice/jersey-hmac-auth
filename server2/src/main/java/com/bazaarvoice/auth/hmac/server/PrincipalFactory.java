@@ -25,6 +25,10 @@ import org.glassfish.jersey.server.ContainerRequest;
 import com.bazaarvoice.auth.hmac.common.Credentials.CredentialsBuilder;
 import com.bazaarvoice.auth.hmac.common.Version;
 
+import static com.bazaarvoice.auth.hmac.common.RequestConfiguration.DEFAULT_SIGNATURE_HTTP_HEADER;
+import static com.bazaarvoice.auth.hmac.common.RequestConfiguration.DEFAULT_TIMESTAMP_HTTP_HEADER;
+import static com.bazaarvoice.auth.hmac.common.RequestConfiguration.DEFAULT_VERSION_HTTP_HEADER;
+
 /**
  * {@link Factory} for creating a principal wherever it is required for a request.
  *
@@ -62,13 +66,21 @@ public class PrincipalFactory<P> implements Factory<P> {
         if (apiKeys == null || apiKeys.isEmpty()) {
             throw new BadRequestException("apiKey is required in param: " + apiKeyName);
         }
+        if (request.getHeaderString(DEFAULT_SIGNATURE_HTTP_HEADER) == null ||
+            request.getHeaderString(DEFAULT_TIMESTAMP_HTTP_HEADER) == null ||
+            request.getHeaderString(DEFAULT_VERSION_HTTP_HEADER) == null) {
+            throw new BadRequestException("Required auth headers not present: " +
+                    DEFAULT_SIGNATURE_HTTP_HEADER + ", " +
+                    DEFAULT_TIMESTAMP_HTTP_HEADER + ", " +
+                    DEFAULT_VERSION_HTTP_HEADER);
+        }
 
         final CredentialsBuilder builder = Credentials.builder();
         builder.withApiKey(!apiKeys.isEmpty() ? apiKeys.get(0) : null);
-        builder.withSignature(request.getHeaderString("X-Auth-Signature"));
-        builder.withTimestamp(request.getHeaderString("X-Auth-Timestamp"));
+        builder.withSignature(request.getHeaderString(DEFAULT_SIGNATURE_HTTP_HEADER));
+        builder.withTimestamp(request.getHeaderString(DEFAULT_TIMESTAMP_HTTP_HEADER));
         builder.withVersion(
-                Version.fromValue(request.getHeaderString("X-Auth-Version")));
+                Version.fromValue(request.getHeaderString(DEFAULT_VERSION_HTTP_HEADER)));
         builder.withMethod(request.getMethod());
         builder.withPath(requestUri.getPath() + "?" + requestUri.getQuery());
         if (request.hasEntity()) {
