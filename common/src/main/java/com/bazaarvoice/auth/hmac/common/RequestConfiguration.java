@@ -16,6 +16,7 @@ public class RequestConfiguration {
     private final String timestampHttpHeader;
     private final String versionHttpHeader;
     private final String apiKeyQueryParamName;
+    private final boolean dataInSignature;
 
     public static Builder builder() {
         return new Builder();
@@ -26,13 +27,15 @@ public class RequestConfiguration {
         this.timestampHttpHeader = DEFAULT_TIMESTAMP_HTTP_HEADER;
         this.versionHttpHeader = DEFAULT_VERSION_HTTP_HEADER;
         this.apiKeyQueryParamName = DEFAULT_API_KEY_QUERY_PARAM;
+        this.dataInSignature = true;
     }
 
-    private RequestConfiguration(String signatureHttpHeader, String timestampHttpHeader, String versionHttpHeader, String apiKeyQueryParamName) {
+    private RequestConfiguration(String signatureHttpHeader, String timestampHttpHeader, String versionHttpHeader, String apiKeyQueryParamName, boolean dataInSignature) {
         this.signatureHttpHeader = signatureHttpHeader;
         this.timestampHttpHeader = timestampHttpHeader;
         this.versionHttpHeader = versionHttpHeader;
         this.apiKeyQueryParamName = apiKeyQueryParamName;
+        this.dataInSignature = dataInSignature;
     }
 
     public String getSignatureHttpHeader() {
@@ -51,39 +54,28 @@ public class RequestConfiguration {
         return apiKeyQueryParamName;
     }
 
+    public boolean isDataInSignature() {
+        return dataInSignature;
+    }
+
+
     public static class Builder {
         private String signatureHttpHeader = DEFAULT_SIGNATURE_HTTP_HEADER;
         private String timestampHttpHeader = DEFAULT_TIMESTAMP_HTTP_HEADER;
         private String versionHttpHeader = DEFAULT_VERSION_HTTP_HEADER;
         private String apiKeyQueryParamName = DEFAULT_API_KEY_QUERY_PARAM;
+        private boolean dataInSignature = true;
 
         private Builder() {}
-
-        public String getApiKeyQueryParamName() {
-            return this.apiKeyQueryParamName;
-        }
 
         public Builder withSignatureHttpHeader(String signatureHttpHeader) {
             this.signatureHttpHeader = signatureHttpHeader;
             return this;
         }
 
-        public String getSignatureHttpHeader() {
-            return this.signatureHttpHeader;
-        }
-
-
-        public String getTimestampHttpHeader() {
-            return timestampHttpHeader;
-        }
-
         public Builder withTimestampHttpHeader(String timestampHttpHeader) {
             this.timestampHttpHeader = timestampHttpHeader;
             return this;
-        }
-
-        public String getVersionHttpHeader() {
-            return versionHttpHeader;
         }
 
         public Builder withVersionHttpHeader(String versionHttpHeader) {
@@ -96,8 +88,13 @@ public class RequestConfiguration {
             return this;
         }
 
+        public Builder withDataInSignature(boolean dataInSignature) {
+            this.dataInSignature = dataInSignature;
+            return this;
+        }
+
         public RequestConfiguration build() {
-            return new RequestConfiguration(signatureHttpHeader, timestampHttpHeader, versionHttpHeader, apiKeyQueryParamName);
+            return new RequestConfiguration(signatureHttpHeader, timestampHttpHeader, versionHttpHeader, apiKeyQueryParamName, dataInSignature);
         }
     }
 }

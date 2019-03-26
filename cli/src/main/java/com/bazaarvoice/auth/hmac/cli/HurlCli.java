@@ -31,6 +31,7 @@ public class HurlCli {
         parser.addArgument("-X", "--request").help("GET (default), POST, PUT, or DELETE").type(String.class).choices("GET", "POST", "PUT", "DELETE").setDefault("GET");
         parser.addArgument("--apiKey").required(true);
         parser.addArgument("--secretKey").required(true);
+        parser.addArgument("--signData").required(false);
         parser.addArgument("-v", "--verbose").action(storeTrue()).help("Prints additional information to stderr");
         parser.addArgument("-d", "--data", "--data-binary").required(false).help("The data to use in a POST (or @filename for a file full of data)");
 
@@ -52,6 +53,7 @@ public class HurlCli {
             String apiKey = ns.getString("apiKey");
             String secretKey = ns.getString("secretKey");
             String contentType = ns.getString("content_type");
+            boolean signData = ns.getBoolean("signData");
             boolean verbose = ns.getBoolean("verbose");
 
             byte[] data = getData(ns.getString("data"));
@@ -61,6 +63,7 @@ public class HurlCli {
                     .withTimestampHttpHeader(ns.getString("headerTimestamp"))
                     .withVersionHttpHeader(ns.getString("headerVersion"))
                     .withApiKeyQueryParamName(ns.getString("apiKeyParamName"))
+                    .withDataInSignature(signData)
                     .build();
 
             String payload = run(method, url, apiKey, secretKey, data, contentType, verbose, requestConfiguration);

@@ -26,7 +26,7 @@
         <jersey1.version>1.17.1</jersey1.version>
         <!-- use latest Jersey 2.x version compatible with JDK 6 -->
         <jersey2.version>2.6</jersey2.version>
-        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.version>1.7.26</slf4j.version>
         <java.minimum.version>1.6</java.minimum.version>
     </properties>
 
@@ -36,7 +36,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <version>2.5.3</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -46,6 +46,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
                     <compilerArgument>-Xlint:all</compilerArgument>
                     <showWarnings>true</showWarnings>
@@ -56,7 +57,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.2</version>
+                <version>1.6.8</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>sonatype-nexus-staging</serverId>
@@ -96,13 +97,28 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.3</version>
+                <version>2.10.1</version>
             </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Use jersey-container-servlet-core to support Servlet API older than 3.0 (as opposed to
+                     jersey-container-servlet)
+                     https://jersey.java.net/documentation/latest/modules-and-dependencies.html#servlet-app-general -->
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet-core</artifactId>
+                <version>${jersey2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
             </dependency>
 
             <!-- for unit tests -->
@@ -116,14 +132,14 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.10</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>1.9.5</version>
+                <version>2.25.1</version>
                 <scope>test</scope>
             </dependency>
 
@@ -154,14 +170,7 @@
                 <version>5.1.6</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-            	<!-- Use jersey-container-servlet-core to support Servlet API older than 3.0 (as opposed to
-            	     jersey-container-servlet)
-            	     https://jersey.java.net/documentation/latest/modules-and-dependencies.html#servlet-app-general -->
-            	<groupId>org.glassfish.jersey.containers</groupId>
-            	<artifactId>jersey-container-servlet-core</artifactId>
-            	<version>${jersey2.version}</version>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

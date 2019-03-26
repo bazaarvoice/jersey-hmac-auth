@@ -56,7 +56,10 @@ public class RequestDecoder {
     }
 
     private byte[] getContent(HttpRequestContext request) {
-        return safelyGetContent(request);
+        if (this.requestConfiguration.isDataInSignature()) {
+            return safelyGetContent(request);
+        }
+        return null;
     }
 
     /**

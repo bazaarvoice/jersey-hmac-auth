@@ -67,7 +67,8 @@ public class RequestEncoder {
     private String buildSignature(ClientRequest request, String timestamp) {
         String method = getMethod(request);
         String path = getPath(request);
-        byte[] content = request.hasEntity() ? getContent(request) : null;
+        byte[] content = this.requestConfiguration.isDataInSignature() && request.hasEntity() ? getContent(request) : null;
+
         return signatureGenerator.generate(secretKey, method, timestamp, path, content);
     }
 

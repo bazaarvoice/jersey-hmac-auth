@@ -70,7 +70,8 @@ public class RequestEncoder extends RequestWriter {
     private String buildSignature(ClientRequest request, String timestamp) {
         String method = getMethod(request);
         String path = getPath(request);
-        byte[] content = getContent(request);
+        byte[] content = this.requestConfiguration.isDataInSignature() ? getContent(request) : null;
+
         return signatureGenerator.generate(secretKey, method, timestamp, path, content);
     }
 

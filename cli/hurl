@@ -19,6 +19,9 @@ OPTIONS:
    -c      configure a current session to use a temp apikey/secret
    -v      verbose mode
 
+   --signData    include content data body in signature (default)
+   --noSignData  do not include content data body in signature
+
 ------------------------------------------
 
 EOF
@@ -31,6 +34,7 @@ HURL_SIGNATURE_HEADER="${HURL_SIGNATURE_HEADER:-}"
 HURL_TIMESTAMP_HEADER="${HURL_TIMESTAMP_HEADER:-}"
 HURL_VERSION_HEADER="${HURL_VERSION_HEADER:-}"
 HURL_APIKEY_PARAM="${HURL_APIKEY_PARAM:-}"
+HURL_SIGN_DATA="true"
 CONFIGURE=""
 DEFAULT_METHOD="GET"
 METHOD=""
@@ -83,6 +87,12 @@ while [[ $# > 0 ]]; do
         --apiKeyParamName)
             HURL_APIKEY_PARAM="$1"
             shift
+        ;;
+        --signData)
+            HURL_SIGN_DATA="true"
+        ;;
+        --noSignData)
+            HURL_SIGN_DATA="false"
         ;;
         -c|--configure)
             CONFIGURE="true"
@@ -153,12 +163,14 @@ else
     [[ -z "$HURL_TIMESTAMP_HEADER" ]] && HURL_TIMESTAMP_HEADER="$(grep '^headerTimestamp\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
     [[ -z "$HURL_VERSION_HEADER" ]] && HURL_VERSION_HEADER="$(grep '^headerVersion\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
     [[ -z "$HURL_APIKEY_PARAM" ]] && HURL_APIKEY_PARAM="$(grep '^apiKeyParamName\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
+    [[ -z "$HURL_SIGN_DATA" ]] && HURL_SIGN_DATA="$(grep '^signBody\b' ~/.hurl/$HURL_PROFILE.conf | awk '{ print $2 }')" || :
 fi
 
 [[ -z "$HURL_SIGNATURE_HEADER" ]] && HURL_SIGNATURE_HEADER="X-Auth-Signature"
 [[ -z "$HURL_TIMESTAMP_HEADER" ]] && HURL_TIMESTAMP_HEADER="X-Auth-Timestamp"
 [[ -z "$HURL_VERSION_HEADER" ]] && HURL_VERSION_HEADER="X-Auth-Version"
 [[ -z "$HURL_APIKEY_PARAM" ]] && HURL_APIKEY_PARAM="apiKey"
+[[ -z "$HURL_SIGN_DATA" ]] && HURL_SIGN_DATA="true"
 
 if [[ -z "$HURL_APIKEY" || -z "$HURL_SECRET" || ! -z $CONFIGURE ]]; then
     echo -n "Enter Hurl ApiKey [****${HURL_APIKEY:(-4)}]: " && read HURL_APIKEY
@@ -208,14 +220,14 @@ function signed_data() {
     echo $METHOD
     echo $TIMESTAMP
     local URL_PATH=/$(echo $URL |cut -d/ -f4-)
-    if [[ -n "$DATA_FILE" ]]; then
+    if [[ "$HURL_SIGN_DATA" = "true" ]] && [[ -n "$DATA_FILE" ]]; then
         echo $URL_PATH
         if [[ "$DATA_TYPE_SUFFIX" = "-binary" ]]; then
             cat $DATA_FILE
         else
             cat $DATA_FILE |perl -npe 's/[\r\n]//g' # strip CR/LF characters
         fi
-    elif [[ -n "$DATA" ]]; then
+    elif [[ "$HURL_SIGN_DATA" = "true" ]] && [[ -n "$DATA" ]]; then
         echo $URL_PATH
         # important! omit trailing newline
         echo -n $DATA
@@ -238,6 +250,7 @@ append_args -H "${HURL_VERSION_HEADER}: ${VERSION}"
 if [ ! -z "$VERBOSE" ]; then
     echo "Using ApiKey: ****${HURL_APIKEY:(-4)}" 1>&2
     echo "Using Secret: ****${HURL_SECRET:(-4)}" 1>&2
+    echo "Signing data: ${HURL_SIGN_DATA}"
     set -x # force Bash to echo the following command
 fi
 
