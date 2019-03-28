@@ -34,8 +34,9 @@ public abstract class AbstractCachingAuthenticator<Principal> extends AbstractAu
     /**
      * Do the loading of the Principal based on the Credentials.  Note that this will only be called if the Credentials
      * object is not found in the in-memory cache.
-     * <p/>
-     * Note: it is safe to return null from this method if the Principal is not found for these Credentials, and that will be cached.
+     *
+     * <p>Note: it is safe to return null from this method if the Principal is not found for these Credentials, and that will be cached.
+     * @param credentials   the credentials
      */
     protected abstract Principal loadPrincipal(Credentials credentials);
 
@@ -60,6 +61,8 @@ public abstract class AbstractCachingAuthenticator<Principal> extends AbstractAu
     /**
      * Put this principal directly into cache.  This can avoid lookup on
      * user request and "prepay" the lookup cost.
+     * @param apiKey        the api key
+     * @param principal     the principal
      */
     protected void cachePrincipal(String apiKey, Principal principal) {
         cache.put(apiKey, Optional.fromNullable(principal));
