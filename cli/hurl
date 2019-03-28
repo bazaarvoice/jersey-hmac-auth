@@ -19,7 +19,7 @@ OPTIONS:
    -c      configure a current session to use a temp apikey/secret
    -v      verbose mode
 
-   --version    version of api request (default "3")
+   --version    version of api request (default '3')
 
 ------------------------------------------
 

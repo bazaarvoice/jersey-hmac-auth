@@ -2,6 +2,7 @@ package com.bazaarvoice.auth.hmac.cli;
 
 import com.bazaarvoice.auth.hmac.client.HmacClientFilter;
 import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
+import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -31,6 +32,7 @@ public class HurlCli {
         parser.addArgument("-X", "--request").help("GET (default), POST, PUT, or DELETE").type(String.class).choices("GET", "POST", "PUT", "DELETE").setDefault("GET");
         parser.addArgument("--apiKey").required(true);
         parser.addArgument("--secretKey").required(true);
+        parser.addArgument("--version").required(false).help("Use specific version (default '3')");
         parser.addArgument("-v", "--verbose").action(storeTrue()).help("Prints additional information to stderr");
         parser.addArgument("-d", "--data", "--data-binary").required(false).help("The data to use in a POST (or @filename for a file full of data)");
 
@@ -51,16 +53,22 @@ public class HurlCli {
             String url = ns.getString("url");
             String apiKey = ns.getString("apiKey");
             String secretKey = ns.getString("secretKey");
+            String version = ns.getString("version");
             String contentType = ns.getString("content_type");
             boolean verbose = ns.getBoolean("verbose");
 
             byte[] data = getData(ns.getString("data"));
+
+            if (version == null || version.isEmpty()) {
+                version = Version.V3.getValue();
+            }
 
             final RequestConfiguration requestConfiguration = RequestConfiguration.builder()
                     .withSignatureHttpHeader(ns.getString("headerSignature"))
                     .withTimestampHttpHeader(ns.getString("headerTimestamp"))
                     .withVersionHttpHeader(ns.getString("headerVersion"))
                     .withApiKeyQueryParamName(ns.getString("apiKeyParamName"))
+                    .withVersion(Version.fromValue(version))
                     .build();
 
             String payload = run(method, url, apiKey, secretKey, data, contentType, verbose, requestConfiguration);

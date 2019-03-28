@@ -39,13 +39,13 @@ public class RequestConfiguration {
         this.apiKeyQueryParamName = apiKeyQueryParamName;
         this.version = version;
 
-        // Initialize dataInSignatureMap defaults
-        this.dataInSignatureMap.put(Version.V1, Version.V1.isDataInSignature());
-        this.dataInSignatureMap.put(Version.V2, Version.V2.isDataInSignature());
-        this.dataInSignatureMap.put(Version.V3, Version.V3.isDataInSignature());
-
         if (dataInSignatureMap != null) {
             this.dataInSignatureMap.putAll(dataInSignatureMap);
+        } else {
+            // Initialize dataInSignatureMap defaults
+            this.dataInSignatureMap.put(Version.V1, Version.V1.isDataInSignature());
+            this.dataInSignatureMap.put(Version.V2, Version.V2.isDataInSignature());
+            this.dataInSignatureMap.put(Version.V3, Version.V3.isDataInSignature());
         }
     }
 

@@ -47,5 +47,11 @@ public class MyAuthenticator extends AbstractCachingAuthenticator<Principal> {
 Register the authenticator with Jersey. For example, using Dropwizard:
 
 ```
-environment.addProvider(new HmacAuthProvider(new DefaultRequestHandler(new MyAuthenticator())));
+RequestConfiguration requestConfiguration = RequestConfiguration.builder()
+    .withDataInSignature(Version.V3, true)     // Only accept v3 with data in signature
+    .build()
+
+DefaultRequestHandler requestHandler = new DefaultRequestHandler(new MyAuthenticator(), requestConfiguration);
+
+environment.addProvider(new HmacAuthProvider(requestHandler));
 ```
