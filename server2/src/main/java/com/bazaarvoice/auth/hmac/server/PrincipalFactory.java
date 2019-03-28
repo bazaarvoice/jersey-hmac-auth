@@ -76,16 +76,18 @@ public class PrincipalFactory<P> implements Factory<P> {
                     requestConfiguration.getVersionHttpHeader());
         }
 
+        Version version = Version.fromValue(request.getHeaderString(requestConfiguration.getVersionHttpHeader()));
+
         final CredentialsBuilder builder = Credentials.builder();
         builder.withApiKey(!apiKeys.isEmpty() ? apiKeys.get(0) : null);
         builder.withSignature(request.getHeaderString(requestConfiguration.getSignatureHttpHeader()));
         builder.withTimestamp(request.getHeaderString(requestConfiguration.getTimestampHttpHeader()));
-        builder.withVersion(Version.fromValue(request.getHeaderString(requestConfiguration.getVersionHttpHeader())));
+        builder.withVersion(version);
         builder.withMethod(request.getMethod());
         builder.withPath(requestUri.getPath() + "?" + requestUri.getQuery());
 
         // Content
-        if (requestConfiguration.isDataInSignature() && request.hasEntity()) {
+        if (requestConfiguration.isDataInSignature(version) && request.hasEntity()) {
             try {
                 final InputStream inputStream = request.getEntityStream();
                 try {

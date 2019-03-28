@@ -3,7 +3,6 @@ package com.bazaarvoice.auth.hmac.client;
 import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.TimeUtils;
-import com.bazaarvoice.auth.hmac.common.Version;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.RequestWriter;
@@ -20,6 +19,7 @@ import java.net.URI;
  * by the receiving server.
  */
 public class RequestEncoder extends RequestWriter {
+
     private final String apiKey;
     private final String secretKey;
     private final SignatureGenerator signatureGenerator;
@@ -43,7 +43,7 @@ public class RequestEncoder extends RequestWriter {
         addApiKey(request);
         addTimestamp(request, timestamp);
         addSignature(request, timestamp);
-        addVersion(request, Version.V1);
+        addVersion(request);
     }
 
     private void addApiKey(ClientRequest request) {
@@ -63,8 +63,8 @@ public class RequestEncoder extends RequestWriter {
         request.getHeaders().putSingle(this.requestConfiguration.getTimestampHttpHeader(), timestamp);
     }
 
-    private void addVersion(ClientRequest request, Version version) {
-        request.getHeaders().putSingle(this.requestConfiguration.getVersionHttpHeader(), version.toString());
+    private void addVersion(ClientRequest request) {
+        request.getHeaders().putSingle(this.requestConfiguration.getVersionHttpHeader(), this.requestConfiguration.getVersion().getValue());
     }
 
     private String buildSignature(ClientRequest request, String timestamp) {
@@ -116,4 +116,5 @@ public class RequestEncoder extends RequestWriter {
 
         return outputStream.toByteArray();
     }
+
 }

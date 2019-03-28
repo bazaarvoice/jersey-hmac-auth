@@ -18,8 +18,7 @@ Add filter to Jersey client.
 Client httpClient = ClientBuilder.newClient();
 
 RequestConfiguration requestConfiguration = RequestConfiguration.builder()
-        // Whether or not to sign content body
-        .withDataInSignature(false)
+        .withVersion(Version.V3)    // Specify what version of HMAC to use
         .build();
 
 httpClient.register(new HmacClientFilter(apiKey, apiKeySecret, requestConfiguration));

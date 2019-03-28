@@ -72,7 +72,7 @@ public class HmacClientFilterTest {
                 }
 
                 private void validateVersion(Credentials credentials) throws Exception {
-                    if (credentials.getVersion() != Version.V1) {
+                    if (credentials.getVersion() != Version.V3) {
                         throw new Exception("Invalid version: " + credentials.getVersion());
                     }
                 }

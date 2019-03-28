@@ -43,7 +43,7 @@ public class CredentialsTest {
 
     @Test
     public void hasVersion() {
-        assertEquals(Version.V1, credentials.getVersion());
+        assertEquals(Version.V3, credentials.getVersion());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class CredentialsTest {
                 .withTimestamp("timestamp")
                 .withContent("content".getBytes())
                 .withMethod("GET")
-                .withVersion(Version.V1)
+                .withVersion(Version.V3)
                 .build();
     }
 }

@@ -21,7 +21,7 @@ class TestCredentials {
         String signature = new SignatureGenerator().generate(secretKey, method, timestamp, path, content);
 
         return Credentials.builder()
-            .withVersion(Version.V1)
+            .withVersion(Version.V3)
             .withApiKey(apiKey)
             .withTimestamp(timestamp)
             .withMethod(method)
