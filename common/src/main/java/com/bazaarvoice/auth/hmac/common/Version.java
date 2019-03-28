@@ -7,7 +7,7 @@ public enum Version {
 
     /**
      * Version 1
-     * <p> - Has mix implementations for including content body in signature
+     * <p> - Has mixed implementations for including content body in signature
      */
     @Deprecated
     V1("1", true),
