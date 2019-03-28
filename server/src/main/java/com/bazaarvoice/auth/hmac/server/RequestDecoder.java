@@ -25,15 +25,21 @@ public class RequestDecoder {
     }
 
     public Credentials decode(HttpRequestContext request) {
-        return Credentials.builder()
+        Version version = getVersion(request);
+
+        Credentials.CredentialsBuilder builder = Credentials.builder()
                 .withApiKey(getApiKey(request))
                 .withSignature(getSignature(request))
                 .withPath(getPath(request))
                 .withTimestamp(getTimestamp(request))
-                .withContent(getContent(request))
                 .withMethod(getMethod(request))
-                .withVersion(Version.V1)
-                .build();
+                .withVersion(version);
+
+        if (requestConfiguration.isDataInSignature(version)) {
+            builder.withContent(getContent(request));
+        }
+
+        return builder.build();
     }
 
     private String getPath(HttpRequestContext request) {
@@ -53,6 +59,14 @@ public class RequestDecoder {
 
     private String getTimestamp(HttpRequestContext request) {
         return getRequiredHeaderField(request, this.requestConfiguration.getTimestampHttpHeader());
+    }
+
+    private Version getVersion(HttpRequestContext request) {
+        return Version.fromValue(getRequiredHeaderField(request, this.requestConfiguration.getVersionHttpHeader()));
+    }
+
+    private String getMethod(HttpRequestContext request) {
+        return request.getMethod();
     }
 
     private byte[] getContent(HttpRequestContext request) {
@@ -80,10 +94,6 @@ public class RequestDecoder {
         } catch (IOException ex) {
             throw new ContainerException(ex);
         }
-    }
-
-    private String getMethod(HttpRequestContext request) {
-        return request.getMethod();
     }
 
     private String getRequiredHeaderField(HttpRequestContext request, String name) {

@@ -105,6 +105,21 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
+            <dependency>
+                <!-- Use jersey-container-servlet-core to support Servlet API older than 3.0 (as opposed to
+                     jersey-container-servlet)
+                     https://jersey.java.net/documentation/latest/modules-and-dependencies.html#servlet-app-general -->
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet-core</artifactId>
+                <version>${jersey2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+
             <!-- for unit tests -->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -154,14 +169,7 @@
                 <version>5.1.6</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-            	<!-- Use jersey-container-servlet-core to support Servlet API older than 3.0 (as opposed to
-            	     jersey-container-servlet)
-            	     https://jersey.java.net/documentation/latest/modules-and-dependencies.html#servlet-app-general -->
-            	<groupId>org.glassfish.jersey.containers</groupId>
-            	<artifactId>jersey-container-servlet-core</artifactId>
-            	<version>${jersey2.version}</version>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

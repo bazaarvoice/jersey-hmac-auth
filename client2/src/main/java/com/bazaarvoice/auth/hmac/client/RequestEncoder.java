@@ -3,7 +3,6 @@ package com.bazaarvoice.auth.hmac.client;
 import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import com.bazaarvoice.auth.hmac.common.TimeUtils;
-import com.bazaarvoice.auth.hmac.common.Version;
 import org.glassfish.jersey.client.ClientRequest;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
 
@@ -19,6 +18,7 @@ import java.net.URI;
  * by the receiving server.
  */
 public class RequestEncoder {
+
     private final String apiKey;
     private final String secretKey;
     private final SignatureGenerator signatureGenerator;
@@ -40,7 +40,7 @@ public class RequestEncoder {
         addApiKey(request);
         addTimestamp(request, timestamp);
         addSignature(request, timestamp);
-        addVersion(request, Version.V1);
+        addVersion(request);
     }
 
     private void addApiKey(ClientRequest request) {
@@ -60,14 +60,16 @@ public class RequestEncoder {
         request.getHeaders().putSingle(this.requestConfiguration.getTimestampHttpHeader(), timestamp);
     }
 
-    private void addVersion(ClientRequest request, Version version) {
-        request.getHeaders().putSingle(this.requestConfiguration.getVersionHttpHeader(), version.toString());
+    private void addVersion(ClientRequest request) {
+        request.getHeaders().putSingle(this.requestConfiguration.getVersionHttpHeader(), this.requestConfiguration.getVersion().getValue());
     }
 
     private String buildSignature(ClientRequest request, String timestamp) {
         String method = getMethod(request);
         String path = getPath(request);
-        byte[] content = request.hasEntity() ? getContent(request) : null;
+
+        byte[] content = this.requestConfiguration.isDataInSignature() && request.hasEntity() ? getContent(request) : null;
+
         return signatureGenerator.generate(secretKey, method, timestamp, path, content);
     }
 

@@ -86,7 +86,7 @@ public class Credentials {
     }
 
     public static class CredentialsBuilder {
-        private Version version = Version.V1;
+        private Version version = Version.V3;
         private String apiKey = "";
         private String signature = "";
         private String path = "";

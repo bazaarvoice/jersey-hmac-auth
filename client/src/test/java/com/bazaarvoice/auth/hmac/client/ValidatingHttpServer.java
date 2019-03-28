@@ -85,7 +85,7 @@ public abstract class ValidatingHttpServer implements Container {
                     .withTimestamp(getTimestamp(request, requestConfiguration))
                     .withContent(getContent(request))
                     .withMethod(getMethod(request))
-                    .withVersion(Version.V1)
+                    .withVersion(Version.V3)
                     .build();
         }
 

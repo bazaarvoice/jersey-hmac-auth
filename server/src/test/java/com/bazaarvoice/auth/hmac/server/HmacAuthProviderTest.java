@@ -145,7 +145,7 @@ public class HmacAuthProviderTest extends JerseyTest {
                 .queryParam(this.requestConfiguration.getApiKeyQueryParamName(), apiKey)
                 .header(this.requestConfiguration.getSignatureHttpHeader(), "signature")
                 .header(this.requestConfiguration.getTimestampHttpHeader(), "timestamp")
-                .header(this.requestConfiguration.getVersionHttpHeader(), Version.V1)
+                .header(this.requestConfiguration.getVersionHttpHeader(), Version.V3)
                 .get(String.class);
     }
 
@@ -180,7 +180,7 @@ public class HmacAuthProviderTest extends JerseyTest {
                 .queryParam(this.requestConfiguration.getApiKeyQueryParamName(), apiKey)
                 .header(this.requestConfiguration.getSignatureHttpHeader(), "signature")
                 .header(this.requestConfiguration.getTimestampHttpHeader(), "timestamp")
-                .header(this.requestConfiguration.getVersionHttpHeader(), Version.V1)
+                .header(this.requestConfiguration.getVersionHttpHeader(), Version.V3)
                 .entity(content)
                 .post(String.class);
     }

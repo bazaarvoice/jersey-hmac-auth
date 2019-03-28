@@ -4,13 +4,11 @@ import com.bazaarvoice.auth.hmac.common.RequestConfiguration;
 import com.bazaarvoice.auth.hmac.common.SignatureGenerator;
 import org.glassfish.jersey.client.ClientRequest;
 
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.net.URI;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.ext.Provider;
-
-import javax.ws.rs.client.ClientRequestFilter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -77,6 +75,7 @@ public class HmacClientFilter implements ClientRequestFilter {
      * @param apiKey the API key
      * @param secretKey the secret key
      * @param endpointToSecure the endpoint {@link URI} to secure with this filter
+     * @param requestConfiguration your settings for this endpoint.
      */
     public HmacClientFilter(String apiKey, String secretKey, URI endpointToSecure, RequestConfiguration requestConfiguration) {
         checkNotNull(apiKey, "apiKey");
