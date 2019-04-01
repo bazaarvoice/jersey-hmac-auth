@@ -28,6 +28,17 @@ library provides support in Java for client libraries that use the Jersey
 * [Jersey 2.x](client2) - `org.glassfish.jersey`
 * [Jersey 1.x](client) - `com.sun.jersey`
 
+## HMAC Versions
+
+The HMAC [version](https://github.com/bazaarvoice/jersey-hmac-auth/blob/master/common/src/main/java/com/bazaarvoice/auth/hmac/common/Version.java) so far have only been used to distinguished between using POST/PUT data in signature or not.
+
+The server _may_ support any number of versions, however client must supply a version and appropriate include or not include data in signature. 
+
+* **Version 1** - Has mixed implementations for including content data in signature (deprecated)
+* **Version 2** - Will not include content data in signature
+* **Version 3** - Will include content data in signature
+
+
 ## User Guide
 
 See the [User Guide](https://github.com/bazaarvoice/jersey-hmac-auth/wiki) for more details.

@@ -7,20 +7,20 @@ public enum Version {
 
     /**
      * Version 1
-     * <p> - Has mixed implementations for including content body in signature
+     * <p> - Has mixed implementations for including content data in signature (deprecated)
      */
     @Deprecated
     V1("1", true),
 
     /**
      * Version 2
-     * <p> - do not include content body in signature
+     * <p> - will not include content data in signature
      */
     V2("2", false),
 
     /**
      * Version 3
-     * <p> - include content body in signature
+     * <p> - will include content data in signature
      */
     V3("3", true),
 
