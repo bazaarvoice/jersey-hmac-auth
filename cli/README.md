@@ -6,8 +6,6 @@ Use hurl as a simple curl-like interface to work with endpoints that are protect
 Usage
 -----
 
-First, `mvn package` or `mvn install` this cli module.
-
 ```
 export PATH=~/work/jersey-hmac-auth/cli:$PATH
 hurl --apiKey somekey --secretKey somesecret URL
