@@ -1,0 +1,17 @@
+version: 1
+update_configs:
+
+  # create PRs daily for any security updates
+  - package_manager: "java:maven"
+    directory: "/"
+    update_schedule: "daily"
+    target_branch: "dependencies"
+    default_reviewers:
+      - "bazaarvoice/cerberus"
+    allowed_updates:
+      - match:
+          dependency_type: "production"
+          update_type: "security"
+    commit_message:
+      prefix: "chore"
+      include_scope: true
