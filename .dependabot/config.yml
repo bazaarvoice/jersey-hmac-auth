@@ -5,7 +5,7 @@ update_configs:
   - package_manager: "java:maven"
     directory: "/"
     update_schedule: "daily"
-    target_branch: "dependencies"
+    target_branch: "master"
     default_reviewers:
       - "bazaarvoice/cerberus"
     allowed_updates:
