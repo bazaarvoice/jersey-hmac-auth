@@ -6,7 +6,7 @@
         <groupId>com.bazaarvoice.commons</groupId>
         <artifactId>bv-opensource-super-pom</artifactId>
         <version>1.2</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <groupId>com.bazaarvoice.auth</groupId>
@@ -26,7 +26,7 @@
         <jersey1.version>1.17.1</jersey1.version>
         <!-- use latest Jersey 2.x version compatible with JDK 6 -->
         <jersey2.version>2.6</jersey2.version>
-        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <java.minimum.version>1.6</java.minimum.version>
     </properties>
 
