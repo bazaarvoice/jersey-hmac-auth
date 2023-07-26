@@ -1,6 +1,6 @@
-package com.bazaarvoice.auth.hmac.sample.server;
+package com.bazaarvoice.auth.hmac.dropwizard.server;
 
-import com.bazaarvoice.auth.hmac.sample.Pizza;
+import com.bazaarvoice.auth.hmac.dropwizard.Pizza;
 import com.bazaarvoice.auth.hmac.server.HmacAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

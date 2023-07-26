@@ -1,4 +1,4 @@
-package com.bazaarvoice.auth.hmac.sample;
+package com.bazaarvoice.auth.hmac.dropwizard;
 
 import java.util.List;
 

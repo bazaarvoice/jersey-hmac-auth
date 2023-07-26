@@ -1,11 +1,11 @@
-package com.bazaarvoice.auth.hmac.sample.server;
+package com.bazaarvoice.auth.hmac.dropwizard.server;
 
-import com.yammer.metrics.core.HealthCheck;
+import com.codahale.metrics.health.HealthCheck;
 
 public class PizzaHealthCheck extends HealthCheck {
 
     public PizzaHealthCheck() {
-        super("pizza-application");
+        super();
     }
 
     @Override
