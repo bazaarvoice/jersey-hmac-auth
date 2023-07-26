@@ -6,7 +6,7 @@
         <groupId>com.bazaarvoice.commons</groupId>
         <artifactId>bv-opensource-super-pom</artifactId>
         <version>1.2</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <groupId>com.bazaarvoice.auth</groupId>
@@ -96,7 +96,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.3</version>
+                <version>2.10.14</version>
             </dependency>
 
             <dependency>
