@@ -1,6 +1,6 @@
-package com.bazaarvoice.auth.hmac.sample.client;
+package com.bazaarvoice.auth.hmac.dropwizard.client;
 
-import com.bazaarvoice.auth.hmac.sample.Pizza;
+import com.bazaarvoice.auth.hmac.dropwizard.Pizza;
 import com.google.common.base.Joiner;
 
 import java.net.URI;

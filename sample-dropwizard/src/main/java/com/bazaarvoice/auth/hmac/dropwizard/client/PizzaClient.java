@@ -1,7 +1,7 @@
-package com.bazaarvoice.auth.hmac.sample.client;
+package com.bazaarvoice.auth.hmac.dropwizard.client;
 
 import com.bazaarvoice.auth.hmac.client.HmacClientFilter;
-import com.bazaarvoice.auth.hmac.sample.Pizza;
+import com.bazaarvoice.auth.hmac.dropwizard.Pizza;
 import com.sun.jersey.api.client.Client;
 
 import javax.ws.rs.core.MediaType;
