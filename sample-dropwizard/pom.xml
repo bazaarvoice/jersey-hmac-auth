@@ -15,7 +15,7 @@
     <description>Sample Dropwizard application using jersey-hmac-auth</description>
 
     <properties>
-        <dropwizard.version>1.3.0</dropwizard.version>
+        <dropwizard.version>1.3.29</dropwizard.version>
     </properties>
 
     <dependencies>
